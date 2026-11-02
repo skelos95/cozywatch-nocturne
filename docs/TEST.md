@@ -1,6 +1,6 @@
 # Test nel gioco
 
-Questa è la matrice operativa per il codice corrente, con versione nominale **0.8.3**, tema **Nocturne** e menu sociali **Unreleased**. Il tag e l'allegato v0.8.3 identificano il codice della release, senza i nuovi menu successivi; anche la release storica 0.8.2 conserva il proprio tag e allegato. Eseguire prima i [controlli automatici](VALIDAZIONE.md), poi associare ogni prova al commit importato.
+Questa è la matrice operativa per il codice **0.8.4**, tema **Nocturne**. Le release 0.8.2 e 0.8.3 conservano i pacchetti storici. Eseguire prima i [controlli automatici](VALIDAZIONE.md), poi associare ogni prova al commit importato.
 
 ## Riscontri disponibili
 
@@ -38,7 +38,7 @@ Questa è la matrice operativa per il codice corrente, con versione nominale **0
 
 Il sorgente corrente compatta il blocco delle icone e aggiunge un budget strutturale preventivo. La modalità si chiama Cozywatch e usa il tema Nocturne; il Light Shaft è rimosso e le icone personali restano entro 5 m tridimensionali dal proprietario. Prima di una nuova prova di carico, reimportarlo in una lobby nuova e registrare **Element Count e Largest Rule**: la stima offline e i byte del testo non sono queste due misure native.
 
-Il riscontro generale «funziona tutto», ricevuto il 28 ottobre dopo la PR #114, precede la correzione Ghost e i menu sociali Unreleased e resta qualitativo, senza SHA importato, build client, durata, numero di player o metriche native. La successiva segnalazione sul ritorno dalle pagine 17–20 richiede la regressione dedicata sotto. Nei riscontri storici l'utente aveva confermato anche la distanza tra HOST e killfeed dopo la PR #105. La matrice seguente resta il riferimento per verificare le nuove funzioni e registrare separatamente i singoli casi, durata e carico.
+Il riscontro generale «funziona tutto», ricevuto il 28 ottobre dopo la PR #114, precede la correzione Ghost e i menu sociali ora inclusi nella 0.8.4 e resta qualitativo, senza SHA importato, build client, durata, numero di player o metriche native. La successiva segnalazione sul ritorno dalle pagine 17–20 richiede la regressione dedicata sotto. Nei riscontri storici l'utente aveva confermato anche la distanza tra HOST e killfeed dopo la PR #105. La matrice seguente resta il riferimento per verificare le nuove funzioni e registrare separatamente i singoli casi, durata e carico.
 
 ## Preparazione
 
@@ -66,6 +66,13 @@ Per il confronto di stabilità impostare **60 minuti**; il riavvio allo zero è 
 Misurare baseline vuota, dopo gli ingressi, durante il picco e dopo cleanup completo. Ripetere la stessa configurazione quando si confrontano revisioni; una singola sessione riuscita non copre tutte le combinazioni.
 
 Con 12 umani, menu chiusi e nessun overlay temporaneo, il baseline previsto è 15 HUD: tre fissi più una riga Souls & Echoes per umano. I menu si aprono alla registrazione: chiuderli prima di misurare questo baseline. Le icone e gli In-World Text vanno confrontati separatamente.
+
+## Revisione 0.8.4
+
+- Nel principale non deve comparire Reload come ritorno; nei sottomenu deve restare disponibile.
+- Ghost / Fly e Multijump devono mostrare una sola riga con il cursore `>`, senza una voce vuota.
+- Whispers deve mostrare il binding personale per mirare e il countdown WAIT fino a READY, anche senza premere Interact; il reset conserva l’attesa. Verificare che conferma e destinatario restino leggibili.
+- Provare Travel vicino a muri, in passaggi stretti, sotto soffitti bassi e sul bordo del vuoto. La rimozione dei raggi orizzontali ridondanti conserva le verifiche finali, da confermare sulla geometria nativa.
 
 ## Regressioni da provare
 
@@ -101,9 +108,9 @@ Con 12 umani, menu chiusi e nessun overlay temporaneo, il baseline previsto è 1
 ### Presence, Fates, Whispers e Moonlit Aura
 
 - Presence 17: Unspoken iniziale non aggiunge testo nel roster. Selezionare Seeking company, Listening in silence, Lost in thought e Away beyond the veil con due umani indipendenti; si aggiorna soltanto la propria riga, senza nuove targhette o handle. Away è manuale e resta selezionato durante il movimento: nessun automatismo AFK, cambio di protezione, fisica o Privacy. Il reset torna a Unspoken.
-- Fates 18: eseguire Moon/Ash, d6, d20, percentuale e presagio; risultati entro 1–6, 1–20 e 1–100%, con sei presagi possibili. Il risultato deve comparire soltanto nell'HUD privato sotto Arcade, area Top in ordine 4 con Arcade in 3, una riga vuota prima del testo e nessuna notifica Big Message. Il corpo Fates deve mostrare soltanto READY/RESTING Xs, senza ripetere il tiro. Controllare leggibilità, colore e assenza di sovrapposizioni con menu, titolo e countdown, anche su mappe chiare/scure. Luck e altre preferenze restano invariati.
+- Fates 18: eseguire Moon/Ash, d6, d20, percentuale e presagio; risultati entro 1–6, 1–20 e 1–100%, con sei presagi possibili. Il risultato deve comparire soltanto nell'HUD privato sotto Arcade, area Top in ordine 4 con Arcade in 3, una riga vuota prima del testo e nessuna notifica Big Message. Il corpo Fates deve mostrare soltanto READY/WAIT Xs, senza ripetere il tiro. Controllare leggibilità, colore e assenza di sovrapposizioni con menu, titolo e countdown, anche su mappe chiare/scure. Luck e altre preferenze restano invariati.
 - Fates: il testo del risultato deve restare quello acquisito al tiro anche dopo il tick che svuota `ActivePlayer` e `TriggerPlayer`, cambiando cursore e tornando al principale; nessun testo vuoto, `0`, cambio di proprietario o nuovo tiro casuale. Con due umani che tirano insieme ognuno vede soltanto il proprio risultato. Misurare durata minima 3 secondi e rimozione al controllo 1 Hz successivo, entro 4 secondi; chiudere Arcade non deve creare duplicati o prolungare la scadenza.
-- Fates: premere ripetutamente e tenere Interact, una sola esecuzione valida e attesa personale di 5 secondi. Reset durante il cooldown pulisce cursore e stringa, rimuove subito il proprio HUD e conserva RESTING fino alla scadenza; l'HUD dell'altro umano resta visibile. Chiusura e riapertura non aggirano l'attesa. Uscire o cambiare squadra durante il risultato, con perdita delle variabili del proprietario e riuso dello slot: nessun HUD orfano, risultato ereditato o distruzione dell'HUD del nuovo occupante, anche con ID riciclati ed eventi tardivi.
+- Fates: premere ripetutamente e tenere Interact, una sola esecuzione valida e attesa personale di 5 secondi. Reset durante il cooldown pulisce cursore e stringa, rimuove subito il proprio HUD e conserva WAIT fino alla scadenza; l'HUD dell'altro umano resta visibile. Chiusura e riapertura non aggirano l'attesa. Uscire o cambiare squadra durante il risultato, con perdita delle variabili del proprietario e riuso dello slot: nessun HUD orfano, risultato ereditato o distruzione dell'HUD del nuovo occupante, anche con ID riciclati ed eventi tardivi.
 - Whispers 19: ricezione iniziale ON. Con tre umani, mirare a un destinatario vicino, poi oltre 25 m e alla massima distanza praticabile nella mappa, e provare Greeting, Respect, Rose, Embrace e Resonance: tutti gli invii validi devono riuscire senza limite di distanza. Il messaggio raggiunge soltanto mittente e destinatario; il terzo player non riceve nulla. Il testo resta predefinito, senza chat libera, azioni fisiche o modifiche del microfono.
 - Whispers, anteprima: aprire la pagina 19 e tenere Crouch da vivi; mirare alternativamente a due umani validi vicini e lontani. Il nome nel menu deve seguire la mira con aggiornamento a 10 Hz, senza un nuovo HUD o IWT. Rilasciare Crouch, tornare al principale, chiudere Arcade e morire: l'anteprima deve svuotarsi e non mostrare il nome precedente alla riapertura o alla rinascita. Ripetere con due mittenti contemporanei: nomi e cursori restano personali.
 - Whispers, controlli condivisi: non mostrare nell'anteprima né inviare verso sé stessi, dummy/AI, morti, non spawned, player non registrati/non preparati o in transizione, privati e destinatari con ricezione OFF. Verificare bersagli dentro/fuori l'angolo di mira di 12°, dietro un ostacolo e che escono o cambiano squadra prima del comando, anche oltre 25 m. Disattivare ricezione e Privacy in momenti diversi: i due filtri restano indipendenti e il nome non deve restare visibile dopo l'aggiornamento.

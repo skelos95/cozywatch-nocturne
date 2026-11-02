@@ -6,6 +6,7 @@ their native appearance and cost still require the Overwatch client.
 """
 from copy import deepcopy
 import json
+import math
 import operator
 from pathlib import Path
 import re
@@ -184,7 +185,8 @@ class NocturneEvaluator(DirectToggleEvaluator):
             return (points[0] - points[1]).magnitude()
         if name in ("IsInViewAngle", "IsInLineOfSight"):
             return self.players.get(self.aim, {}).get("in_view" if name == "IsInViewAngle" else "los", True)
-        if name == "RoundToInteger": return round(args[0])
+        if name == "RoundToInteger":
+            return math.ceil(args[0]) if args[1] == "Up" else round(args[0])
         if name in ("IsDuplicating",): return False
         if name in ("HeroOf", "HeroIconString"): return "hero"
         return super().call(name, args)
@@ -486,7 +488,7 @@ class NocturneSocialTests(unittest.TestCase):
                     elif page == 18:
                         self.assertIn("FATES: READY", model.evaluate(installed[3]))
                         state["NocturneState"][3] = model.now + 2
-                        self.assertIn("FATES: RESTING 2s", model.evaluate(installed[3]))
+                        self.assertIn("FATES: WAIT 2s", model.evaluate(installed[3]))
                         model.now += 2
                         self.assertIn("FATES: READY", model.evaluate(installed[3]))
                     elif page == 19:
@@ -751,7 +753,7 @@ class NocturneSocialTests(unittest.TestCase):
             model.routine("DrawMenu", "owner")
             expression = model.hud_bodies[owner["MenuHud"]]
             with self.subTest(artifact=artifact, phase="released"):
-                self.assertIn("HOLD CROUCH", model.evaluate(expression))
+                self.assertIn("HOLD Crouch TO AIM", model.evaluate(expression))
                 self.assertNotIn("Distant soul", model.evaluate(expression))
             owner["held"] = {"Crouch"}
             model.preview_cycle("owner")
@@ -767,7 +769,7 @@ class NocturneSocialTests(unittest.TestCase):
             model.preview_cycle("owner")
             model.event_player = "owner"
             with self.subTest(artifact=artifact, phase="private"):
-                self.assertIn("TARGET: NO WILLING SOUL", model.evaluate(expression))
+                self.assertIn("TARGET: NO AVAILABLE PLAYER", model.evaluate(expression))
                 self.assertNotIn("Distant soul", model.evaluate(expression))
             target["InspectionPrivacyActive"] = False
             model.apply("owner", 19, 3)
@@ -800,7 +802,7 @@ class NocturneSocialTests(unittest.TestCase):
             model.apply("owner", 19, 4)
             installed = model.message_arguments[:]
             expected = [
-                ("Small Message", "target", "Sender soul: A gentle embrace across the silence."),
+                ("Small Message", "target", "Sender soul: A quiet embrace."),
                 ("Small Message", "owner", "SENT: GENTLE EMBRACE -> Recipient soul"),
             ]
             self.assertEqual(model.messages, expected)
@@ -817,6 +819,25 @@ class NocturneSocialTests(unittest.TestCase):
                                   for kind, recipient, body in installed], expected)
                 self.assertEqual(owner["NocturneState"][11:14], [None, "", 0])
                 self.assertEqual(owner["NocturneState"][6], model.now + 15)
+
+    def test_whisper_hud_counts_down_without_clicking_and_reset_preserves_the_wait(self):
+        for artifact, model in self.models():
+            owner = model.add("owner", MenuPage=19, held={"Crouch"})
+            model.add("target")
+            model.aim = "target"
+            model.routine("DrawMenu", "owner")
+            expression = model.hud_bodies[owner["MenuHud"]]
+            self.assertIn("RECEIVE: ON | READY", model.evaluate(expression))
+            model.apply("owner", 19, 1)
+            deadline = owner["NocturneState"][6]
+            for remaining, expected in ((15, "WAIT 15s"), (1.1, "WAIT 2s"),
+                                        (0.1, "WAIT 1s"), (0, "READY")):
+                model.now = deadline - remaining
+                with self.subTest(artifact=artifact, remaining=remaining):
+                    self.assertIn("RECEIVE: ON | " + expected, model.evaluate(expression))
+                    model.routine("ResetMenuPage", "owner")
+                    self.assertEqual(owner["NocturneState"][6], deadline)
+                    self.assertIn("RECEIVE: ON | " + expected, model.evaluate(expression))
 
     def test_whispers_reject_invalid_private_dead_or_transitioning_targets(self):
         blocked = ({"alive": False}, {"spawned": False}, {"exists": False},

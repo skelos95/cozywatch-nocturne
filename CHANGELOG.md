@@ -1,15 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.8.4 — 2026-11-02
 
-- Quattro menu personali a tema Nocturne: Presence 17, Fates 18, Whispers 19 e Moonlit Aura 20. Le voci precedenti mantengono i propri indici; VERSION resta 0.8.3 e il tag e l'allegato della release pubblicata conservano il codice storico.
+- Quattro menu personali a tema Nocturne: Presence 17, Fates 18, Whispers 19 e Moonlit Aura 20. Le voci precedenti mantengono i propri indici; VERSION passa a 0.8.4; i tag e gli allegati delle release precedenti conservano il codice storico.
 - Presence aggiunge uno dei quattro stati sociali alla riga Souls & Echoes; Unspoken è il default senza testo aggiuntivo. La presenza è manuale, senza rilevamento automatico AFK o modifiche alla fisica.
 - Fates genera Moon/Ash, d6, d20, percentuali 1–100% e sei presagi locali. Conserva un cooldown di 5 secondi, che il reset non annulla.
 - Whispers invia Greeting, Respect, Rose, Embrace e Resonance al solo umano vivo mirato. Rispetta Privacy e ricezione personale ON/OFF, usa messaggi privati ai due partecipanti e applica 15 secondi di cooldown agli invii riusciti.
 - Moonlit Aura aggiunge Moonlit Ring, Withered Halo e Veil of Ash: un effetto per umano, massimo 12, con posizione e Name Color del proprietario. Il filtro personale Hide other auras conserva la propria aura e le scelte altrui.
 - Crouch + Ultimate ripristina la sola pagina 17–20 selezionata, senza azzerare i cooldown. Preferenze conservate tra morte e cambio eroe, default al cambio squadra e al nuovo ingresso. Resa visiva, ricezione dei messaggi e ciclo di vita delle aure richiedono una prova sul commit importato nel client.
 - Corretto il ritorno con Crouch + Reload dalle pagine 17–20: il renderer cattura la sola pagina dell'HUD, evitando il passaggio visibile a Moonlit Aura 20 prima del principale. Cursori, scelte e preferenze restano rivalutati durante l'uso della pagina.
-- Il risultato Fates usa un HUD privato sotto Arcade al posto di Big Message, con una riga vuota prima del testo e risultato congelato al tiro. Scadenza a 3 secondi e rimozione a 1 Hz, entro 4 secondi; ownership e cleanup usano un registro canonico dedicato. Il menu mostra READY/RESTING senza duplicare il risultato; il reset rimuove il proprio HUD conservando il cooldown.
+- Il risultato Fates usa un HUD privato sotto Arcade al posto di Big Message, con una riga vuota prima del testo e risultato congelato al tiro. Scadenza a 3 secondi e rimozione a 1 Hz, entro 4 secondi; ownership e cleanup usano un registro canonico dedicato. Il menu mostra READY/WAIT senza duplicare il risultato; il reset rimuove il proprio HUD conservando il cooldown.
 - Whispers ora raggiunge un bersaglio valido a qualsiasi distanza: rimosso il limite di 25 m, mantenendo mira entro 12°, linea di vista, umano vivo pubblico, ricezione ON e cooldown personale di 15 secondi.
 - Whispers 19 mostra il nome del destinatario valido sotto mira mentre il mittente vivo tiene Crouch, con aggiornamento a 10 Hz e pulizia al rilascio, all'uscita dalla pagina o alla morte. Anteprima e invio condividono selezione e controlli; ogni invio rilegge la mira. Dopo il successo, il menu mostra per 3 secondi `SENT: <messaggio> -> <nome>` e la conferma Small Message cattura lo stesso invio. Il reset pulisce anteprima e conferma, riporta ricezione ON e cursore 0 e conserva il cooldown. Nessun nuovo campo player: tre slot aggiuntivi di NocturneState, due globali temporanee e una subroutine; le nuove letture e conferme richiedono una prova nel client.
 - Titolo `cozywatch.org [countdown]` nel sottotitolo in alto a destra, sopra HOST con una riga vuota tra i due; conservati il margine inferiore HOST per il killfeed e il ciclo RGB. Un solo HUD Right 0 riunisce titolo/timer e HOST; rimossi il vecchio titolo Top e lo spazio fisso: tre HUD globali invece di cinque e menu centrali più in alto. Nuova disposizione da verificare nel client.
@@ -17,7 +17,10 @@
 - Il menu Icon 7 aggiunge FLOATING ON/OFF come ultima, 38ª voce, separata dal simbolo scelto. Crouch + Interact alterna il toggle e Crouch + Ultimate ripristina anche FLOATING ON. La preferenza usa NocturneState[14], senza una nuova dichiarazione player.
 - Privacy ON riserva l’icona fluttuante attiva al proprietario; Privacy OFF la rende pubblica. FLOATING OFF la nasconde a tutti, compreso il proprietario. Il simbolo scelto vicino al nome in Souls & Echoes resta pubblico e invariato in entrambi i casi; NONE conserva il proprio significato.
 - Una riga vuota sotto SOULS & ECHOES separa il titolo dal roster, senza aggiungere HUD. Nuovi filtri e disposizione richiedono una prova sul commit importato nel client.
-- Specifica e clipboard rigenerati: 311.277 e 337.063 byte UTF-8 normalizzati LF. Runtime: 137 regole numerate 0–136, 107 variabili globali, 128 player e 123 subroutine; 31.652 unità strutturali stimate, massimo 2.940 per regola. Budget offline invariati 32.000/5.000; compilazione e carico richiedono le misure del client.
+- Rimossi il suggerimento Reload non disponibile nel principale e i cursori vuoti di Ghost / Fly e Multijump. Whispers mostra il binding personale per mirare e il countdown di invio; messaggi Fates e Whispers più brevi, con lessico Nocturne.
+- Travel elimina quattro raggi corti ridondanti, mantenendo le verifiche finali di pareti, soffitto, terreno e percorso. La stima runtime scende da 31.652 a 31.454 unità rispetto alla revisione precedente. Test dei confini geometrici e regressioni UI aggiunti.
+- README e guide di importazione/sorgente accorciati; comandi e comportamenti dettagliati raccolti in docs/MANUALE.md.
+- Specifica e clipboard rigenerati: 310.199 e 335.823 byte UTF-8 normalizzati LF. Runtime: 137 regole numerate 0–136, 107 variabili globali, 128 player e 123 subroutine; 31.454 unità strutturali stimate, massimo 2.940 per regola. Budget offline invariati 32.000/5.000; compilazione e carico richiedono le misure del client.
 
 ## 0.8.3 — 2026-10-28
 

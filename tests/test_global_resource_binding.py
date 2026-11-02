@@ -355,7 +355,7 @@ class GlobalResourceBindingTests(unittest.TestCase):
                 owner, target = f"owner{index}", f"target{index}"
                 self.assertEqual([tuple(model.evaluate(argument) for argument in installed)
                                   for installed in snapshots[owner]], [
-                    (target, f"{owner}: A gentle embrace across the silence."),
+                    (target, f"{owner}: A quiet embrace."),
                     (owner, f"SENT: GENTLE EMBRACE -> Soul {index}"),
                 ])
 
