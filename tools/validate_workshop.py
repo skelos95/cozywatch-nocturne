@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Semantic static gate for Cozywatch Workshop 0.8.3.
+"""Semantic static gate for Cozywatch Workshop 0.8.4.
 
 The behavioral contracts validate the explicit logical input, while main also
 checks its English source parity and the real generated global runtime. No compiled
@@ -31,7 +31,7 @@ SOURCE = BEHAVIORAL_REFERENCE
 VERSION = ROOT / "VERSION"
 WORKFLOWS = ROOT / ".github" / "workflows"
 
-CURRENT_VERSION = "0.8.3"
+CURRENT_VERSION = "0.8.4"
 ALLOWED_WORKFLOWS = {"validate-workshop.yml"}
 MAX_DECLARATION_NAME_BYTES = 32
 CORE_DOCS = (
@@ -1637,7 +1637,8 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                                f"{subroutine_target(rule)}: one blank line between commands and content")
                 content_bindings = tuple(binding.args[0] for binding in iter_calls(function_text, "Input Binding String"))
                 checks.require(not content_bindings or
-                               (subroutine_target(rule) == "DrawMultijumpMenu" and content_bindings == ("Button(Jump)",)),
+                               (subroutine_target(rule) == "DrawMultijumpMenu" and content_bindings == ("Button(Jump)",)) or
+                               (subroutine_target(rule) == "DrawNocturneMenu" and content_bindings == ("Button(Crouch)",)),
                                f"{subroutine_target(rule)}: function Text must not duplicate input hints")
                 literals = [parse_literal(custom.args[0]) for custom in iter_calls(subtitle, "Custom String")
                             if custom.args]
@@ -1652,8 +1653,8 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                                    f"{subroutine_target(rule)}: subtitle close command must bind Melee with a 0.5s hold")
                 for button in (("Crouch", "Primary Fire", "Secondary Fire", "Interact", "Reload")
                                if subroutine_target(rule) == "DrawTravelMenu"
-                               else ("Crouch", "Interact", "Reload", "Melee")
-                               if subroutine_target(rule) != "DrawLuckMenu"
+                               else ("Crouch", "Interact", "Melee")
+                               if subroutine_target(rule) == "DrawMainMenu"
                                else ("Crouch", "Interact", "Reload", "Melee")):
                     checks.require(f"Input Binding String(Button({button}))" in subtitle,
                                    f"{subroutine_target(rule)}: subtitle binding missing: {button}")
@@ -1778,7 +1779,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         preview_controls = (
             ("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
             ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
-            ("+ {0}: all controls | + {1}: back", ("Interact", "Reload")),
+            ("+ {0}: all controls", ("Interact",)),
             ("Arcade closed: hold {0} to inspect hero/HP", ("Crouch",)),
             ("Travel off or player/bot/attach mode", ()),
         )
@@ -2328,8 +2329,8 @@ def validate_nocturne_social(checks: Checks, source: str, rules: list[Rule], pla
                                        for call in iter_calls(argument, "Evaluate Once")),
                                "Nocturne: cursori, preferenze e colore restano live")
             for expression_part in ('Custom String("TARGET: {0}"',
-                                    'Custom String("HOLD CROUCH TO AIM")',
-                                    'Custom String("NO WILLING SOUL")',
+                                    'Custom String("HOLD {0} TO AIM", Input Binding String(Button(Crouch)))',
+                                    'Custom String("NO AVAILABLE PLAYER")',
                                     'Player Variable(Event Player.NocturneState[11], DisplayName)',
                                     'Total Time Elapsed < Event Player.NocturneState[13]',
                                     'Custom String("\\n{0}", Event Player.NocturneState[12])'):
@@ -7443,7 +7444,7 @@ def validate_modes_and_camera(checks: Checks, source: str, rules: list[Rule]) ->
             checks.require("Ray Cast Hit Position(" in safe_position.body,
                            "subroutine teleport sicura non verifica terreno/percorso")
             safe_calls = list(iter_calls(safe_position.body, "Ray Cast Hit Position"))
-            checks.require(len(safe_calls) >= 16,
+            checks.require(len(safe_calls) >= 12,
                            "subroutine teleport sicura ha perso una verifica raycast obbligatoria")
             safe_packed = re.sub(r"\s+", "", mask_strings(safe_position.body))
             floor_branch = (
@@ -7465,6 +7466,18 @@ def validate_modes_and_camera(checks: Checks, source: str, rules: list[Rule]) ->
                            "subroutine teleport sicura non invalida il vuoto con il raycast terreno verticale")
             checks.require(path_branch in safe_packed,
                            "subroutine teleport sicura non invalida il percorso finale ostruito")
+            for direction in ("1.500,1.000,0", "-1.500,1.000,0",
+                              "0,1.000,1.500", "0,1.000,-1.500"):
+                final_clearance = (
+                    "If(DistanceBetween(RayCastHitPosition("
+                    "EventPlayer.SafeRevivePosition+Vector(0,1.000,0),"
+                    f"EventPlayer.SafeRevivePosition+Vector({direction}),"
+                    "EmptyArray,EmptyArray,False),"
+                    "EventPlayer.SafeRevivePosition+Vector(0,1.000,0))<1.250);"
+                    "EventPlayer.SafeRevivePosition=Vector(0,0,0);Abort;End;"
+                )
+                checks.require(final_clearance in safe_packed,
+                               f"subroutine teleport sicura: clearance orizzontale finale mancante ({direction})")
             checks.require("Vector(1.500, 1, 0)" in safe_position.body and "Vector(-1.500, 1, 0)" in safe_position.body,
                            "subroutine teleport sicura non mantiene distanza laterale dalle pareti")
             checks.require("Vector(0, 1, 1.500)" in safe_position.body and "Vector(0, 1, -1.500)" in safe_position.body,

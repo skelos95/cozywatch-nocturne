@@ -22,7 +22,7 @@ MENU_PREFIXES = ("91a", "91b", "91c", "91d", "91f", "91g", "91h",
 MAIN_INFO_CONTROLS = (
     ("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
-    ("+ {0}: all controls | + {1}: back", ("Interact", "Reload")),
+    ("+ {0}: all controls", ("Interact",)),
     ("Arcade closed: hold {0} to inspect hero/HP", ("Crouch",)),
     ("Travel off or player/bot/attach mode", ()),
 )
@@ -127,6 +127,7 @@ class EnglishMenuLayoutTests(unittest.TestCase):
                         expected_lines = rendered_control_lines(MAIN_INFO_CONTROLS)
                         self.assertEqual(rendered.splitlines(), expected_lines)
                         self.assertEqual(text_tree.evaluate(context), "")
+                        self.assertNotIn("<Reload>", rendered)
                         for cursor in range(1, 21):
                             with self.subTest(cursor=cursor):
                                 normal_content = compiler._emit(main_menu_branch(content, cursor))
@@ -137,13 +138,15 @@ class EnglishMenuLayoutTests(unittest.TestCase):
                                 self.assertNotIn("\n\n", rendered)
                                 self.assertTrue(rendered.startswith(f"\n{cursor} - "))
                                 self.assertIn("<Interact>", subtitle_tree.evaluate(context))
+                                self.assertNotIn("<Reload>", subtitle_tree.evaluate(context))
                         context.player["MainMenuCursor"] = 0
                         self.assertEqual(subtitle_tree.evaluate(context).splitlines(), expected_lines)
                         self.assertEqual(text_tree.evaluate(context), "")
                         subtitle = compiler._emit(main_menu_branch(subtitle, 1))
                         content = compiler._emit(main_menu_branch(content, 1))
                     content_bindings = [call.args[0] for call in validator.iter_calls(content, "Input Binding String")]
-                    self.assertEqual(content_bindings, ["Button(Jump)"] if prefix == "91t" else [])
+                    self.assertEqual(content_bindings, ["Button(Jump)"] if prefix == "91t"
+                                     else ["Button(Crouch)"] if prefix == "91v" else [])
                     self.assertTrue(content.startswith('Custom String("\\n{0}",'))
                     for text in validator.iter_calls(subtitle, "Custom String"):
                         literal = validator.parse_literal(text.args[0])
@@ -161,6 +164,27 @@ class EnglishMenuLayoutTests(unittest.TestCase):
                         self.assertEqual(soundtrack_branch_bindings(tree, False),
                                          ["Crouch", "Primary Fire", "Secondary Fire",
                                           "Ability 1", "Ability 2", "Interact", "Reload", "Ultimate", "Melee"])
+
+    def test_movement_choice_hints_do_not_render_as_another_selectable_option(self):
+        for path in ARTIFACTS:
+            source = path.read_text(encoding="utf-8")
+            rules = validator.extract_rules(source)
+            _, fields, _, _ = validator.declaration_entries(source)
+            context = CompactionContext([field.name for field in fields])
+            context.player.update(MovementSpeed=100, GhostModeActive=False,
+                                  FlyModeActive=False, MultijumpEnabled=False,
+                                  MultijumpLevel=1)
+            for renderer, field, count in (("DrawGhostFlyMenu", "GhostFlyCursor", 2),
+                                           ("DrawMultijumpMenu", "MultijumpCursor", 11)):
+                hud = next(validator.iter_calls(
+                    validator.rule_by_subroutine(rules, renderer).body, "Create HUD Text"))
+                body = context.parse(compiler.actor_text(hud.args[3]))
+                for cursor in range(count):
+                    context.player[field] = cursor
+                    with self.subTest(artifact=path.name, menu=renderer, cursor=cursor):
+                        rows = body.evaluate(context).splitlines()
+                        self.assertEqual(sum(row.startswith("> ") for row in rows), 1)
+                        self.assertFalse(any(row.strip() == ">" for row in rows))
 
     def test_luck_subheader_hides_locked_commands_until_luck_finishes(self):
         for path in ARTIFACTS:
