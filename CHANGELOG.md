@@ -195,7 +195,7 @@
 - Allineati fixture, validatore, test geometrici e documentazione. La prova geometrica campiona anche il confine di 10 m e verifica il percorso dopo variazioni del roster.
 - Revisione di regole, subroutine, variabili, scheduler, menu, cleanup, dummy, movimento, resurrect, Revenge e Luck: nessun nuovo difetto concreto o regola inutilizzata individuato. Le azioni simili in eventi o contesti diversi restano necessarie.
 
-Le date seguenti descrivono revisioni di `main`. `VERSION` resta nominalmente 0.8.1: il tag storico non coincide con tutti gli aggiornamenti successivi. Dettagli e diff restano nella [cronologia Git](https://github.com/skelos95/ruang-irama-workshop/commits/main/).
+Le date seguenti descrivono revisioni di `main`. `VERSION` resta nominalmente 0.8.1: il tag storico non coincide con tutti gli aggiornamenti successivi. Dettagli e diff restano nella [cronologia Git](https://github.com/skelos95/cozywatch-nocturne/commits/main/).
 
 ## Superman Punch e movimento continuo delle icone — 2026-10-04
 
@@ -274,7 +274,7 @@ Le date seguenti descrivono revisioni di `main`. `VERSION` resta nominalmente 0.
 
 ## Scheduler guidato dallo stato — 2026-09-29
 
-[PR #81](https://github.com/skelos95/ruang-irama-workshop/pull/81), main `68cbc832`.
+[PR #81](https://github.com/skelos95/cozywatch-nocturne/pull/81), main `68cbc832`.
 
 - Dispatch distinto per umani e bot; Fly/Luck/cache soltanto quando necessari, incluso lo stato residuo delle icone.
 - Vision evita il filtro in idle. Slot dummy gestiti a 1 Hz con cooldown per squadra; target follow a 5 Hz, manutenzione bot a 10 Hz.
@@ -283,8 +283,8 @@ Le date seguenti descrivono revisioni di `main`. `VERSION` resta nominalmente 0.
 
 ## Resurrect, Fly e sola Schermaglia — 2026-09-27
 
-- Jump conserva il punto sicuro e prepara/conferma la destinazione camminabile prima e dopo Resurrect nei punti insicuri. Una morte immediata non riarma Jump tenuto. L'utente conferma il recupero nel punto prima problematico e la resurrezione sul posto ([PR #80](https://github.com/skelos95/ruang-irama-workshop/pull/80)).
-- Fly sale da 100% a 1000% in 25 s di avanti puro; velocità richiesta massima 55 m/s ([PR #79](https://github.com/skelos95/ruang-irama-workshop/pull/79)).
+- Jump conserva il punto sicuro e prepara/conferma la destinazione camminabile prima e dopo Resurrect nei punti insicuri. Una morte immediata non riarma Jump tenuto. L'utente conferma il recupero nel punto prima problematico e la resurrezione sul posto ([PR #80](https://github.com/skelos95/cozywatch-nocturne/pull/80)).
+- Fly sale da 100% a 1000% in 25 s di avanti puro; velocità richiesta massima 55 m/s ([PR #79](https://github.com/skelos95/cozywatch-nocturne/pull/79)).
 - Rimossi i rami CTF, payload e Push: dummy e teleport automatico limitati alla Schermaglia. Le mappe restano nel preset della lobby.
 - Preflight esteso ai nomi delle impostazioni. Il problema dei testi vuoti nel client si è risolto sul test minimo dopo riavvio completo del gioco.
 
@@ -294,8 +294,8 @@ Le date seguenti descrivono revisioni di `main`. `VERSION` resta nominalmente 0.
 
 ## Ripristino dopo crash al cambio squadra — 2026-09-25
 
-- Ritirata la [PR #76](https://github.com/skelos95/ruang-irama-workshop/pull/76): cache Arcade, aggiornamento periodico, cooldown cosmetico e rallentamento automatico introdotti insieme alla revisione Friendly.
-- La [PR #77](https://github.com/skelos95/ruang-irama-workshop/pull/77) ripristina runtime e controlli precedenti (`2529608`). L'utente conferma che il cambio squadra non crasha più.
+- Ritirata la [PR #76](https://github.com/skelos95/cozywatch-nocturne/pull/76): cache Arcade, aggiornamento periodico, cooldown cosmetico e rallentamento automatico introdotti insieme alla revisione Friendly.
+- La [PR #77](https://github.com/skelos95/cozywatch-nocturne/pull/77) ripristina runtime e controlli precedenti (`2529608`). L'utente conferma che il cambio squadra non crasha più.
 - Causa nativa non isolata: i 561 test della revisione ritirata non riproducevano il crash. Conservata la prova specifica in [TEST.md](docs/TEST.md#lifecycle-e-accumulo).
 
 ## Camera, Host e profilo — 2026-09-21–23
@@ -322,7 +322,7 @@ Le date seguenti descrivono revisioni di `main`. `VERSION` resta nominalmente 0.
 
 Stato: **live-ready** nella documentazione della regressione storica di agosto 2026; questa attestazione non si applica automaticamente al `main` successivo.
 
-La release storica 0.8.1 identificava il [commit `14ad403babb56c58f9b55f8ebe902f13b18cd02c`](https://github.com/skelos95/ruang-irama-workshop/commit/14ad403babb56c58f9b55f8ebe902f13b18cd02c). Le successive correzioni hanno mantenuto la versione nominale.
+La release storica 0.8.1 identificava il [commit `14ad403babb56c58f9b55f8ebe902f13b18cd02c`](https://github.com/skelos95/cozywatch-nocturne/commit/14ad403babb56c58f9b55f8ebe902f13b18cd02c). Le successive correzioni hanno mantenuto la versione nominale.
 
 - Completati menu personali EN/ID/TH, Dummy Follow, Ghost/Fly, Camera condivisa, Travel & Attach e diagnostica.
 - Regressioni su input, ownership, roster e cambio squadra. Il limite Fly storico era 500%; profilo e comportamento Resurrect hanno ricevuto correzioni successive.

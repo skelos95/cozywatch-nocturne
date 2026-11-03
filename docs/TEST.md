@@ -6,6 +6,7 @@ Questa è la matrice operativa per il codice **0.8.4**, tema **Nocturne**. Le re
 
 | Data / revisione | Riscontro | Limite |
 |---|---|---|
+| 3 novembre, riscontro utente sulla 0.8.4 | L’utente conferma: «funziona tutto». | Riscontro qualitativo generale; build client, durata, numero di player e metriche native non forniti. |
 | 1 novembre, Privacy delle icone / Unreleased | La richiesta aggiunge Privacy sull’icona fluttuante, un interruttore separato FLOATING e una riga vuota sotto Souls & Echoes; il simbolo nel roster resta pubblico. | Nuova funzione da verificare nel client sul commit importato; la matrice sotto distingue pubblico del mondo e del roster. |
 | 1 novembre, Whispers e disposizione titolo / Unreleased | La pagina 19 aggiunge il nome valido sotto mira con Crouch e una conferma SENT di 3 secondi dopo l'invio. Titolo e timer passano nel sottotitolo in alto a destra, sopra HOST con una riga vuota tra i due, liberando spazio sopra i menu centrali. | Anteprima, conferme e nuova disposizione ancora da verificare nel client sul commit importato; la matrice sotto non indica prove già eseguite. |
 | 31 ottobre, correzioni sociali / Unreleased | Segnalato un passaggio visibile a Moonlit Aura 20 tornando al principale dalle pagine 17–20. Il codice corrente cattura la pagina dell'HUD, sposta i risultati Fates in un HUD privato sotto Arcade e rimuove il limite di distanza Whispers. | Correzioni e nuova disposizione Fates ancora da verificare nel client sul commit importato. |
