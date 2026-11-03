@@ -4562,7 +4562,7 @@ class RepositoryMetadataTests(unittest.TestCase):
             f"Il tag finale v{validator.CURRENT_VERSION} identifica il commit pubblicato e validato.",
             f"La release {validator.CURRENT_VERSION} è stata pubblicata.",
             f"La release v{validator.CURRENT_VERSION} è stata pubblicata.",
-            f"https://github.com/skelos95/ruang-irama-workshop/releases/tag/v{validator.CURRENT_VERSION}",
+            f"https://github.com/skelos95/cozywatch-nocturne/releases/tag/v{validator.CURRENT_VERSION}",
         )
         for claim in claims:
             with self.subTest(claim=claim), tempfile.TemporaryDirectory(dir=validator.ROOT.parent) as directory:
