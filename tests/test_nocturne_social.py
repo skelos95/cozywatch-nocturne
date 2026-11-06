@@ -346,7 +346,7 @@ class NocturneSocialTests(unittest.TestCase):
                                      IconNames=[f"icon-{i}" for i in range(37)])
                 model.routine("DrawPlayerIconMenu", "owner")
                 body = model.hud_bodies[owner["MenuHud"]]
-                self.assertIn("7 - ICON 38/38", model.evaluate(body))
+                self.assertIn("7 - SOUL SIGIL / ICON 38/38", model.evaluate(body))
                 self.assertIn("FLOATING: ON", model.evaluate(body))
                 self.assertIn("FLOATING - TURN OFF", model.evaluate(body))
                 for enabled in (False, True, False):
@@ -424,7 +424,7 @@ class NocturneSocialTests(unittest.TestCase):
                     self.assertEqual(model.created_effects, [])
 
     def test_installed_social_hud_keeps_its_page_identity_until_destroyed(self):
-        titles = {17: "17 - PRESENCE", 18: "18 - FATES", 19: "19 - WHISPERS", 20: "20 - MOONLIT AURA"}
+        titles = {17: "17 - SOUL PRESENCE", 18: "18 - FATES", 19: "19 - WHISPERS", 20: "20 - MOONLIT AURA"}
         for artifact, model in self.models():
             for page, title in titles.items():
                 owner = f"owner-{page}"
@@ -519,7 +519,7 @@ class NocturneSocialTests(unittest.TestCase):
             state = model.add("owner", MenuPage=17)
             model.routine("DrawMenu", "owner")
             expression = model.hud_bodies[state["MenuHud"]]
-            self.assertEqual(model.evaluate(expression).splitlines()[1], "17 - PRESENCE")
+            self.assertEqual(model.evaluate(expression).splitlines()[1], "17 - SOUL PRESENCE")
             state["MenuPage"] = -1
             with self.subTest(artifact=path.name):
                 self.assertEqual(model.evaluate(expression).splitlines()[1], "20 - MOONLIT AURA")

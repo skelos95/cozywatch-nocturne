@@ -20,19 +20,19 @@ ARTIFACTS = (*[path for path, _, _ in SOURCES],
 MENU_PREFIXES = ("91a", "91b", "91c", "91d", "91f", "91g", "91h",
                  "91i", "91j", "91n", "91o", "91s", "91t", "91v")
 MAIN_INFO_CONTROLS = (
-    ("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+    ("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
     ("+ {0}: all controls", ("Interact",)),
-    ("Arcade closed: hold {0} to inspect hero/HP", ("Crouch",)),
+    ("Nocturne closed: hold {0} to inspect hero/HP", ("Crouch",)),
     ("Travel off or player/bot/attach mode", ()),
 )
 INFO_CONTROLS = (
     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
     ("+ {0} apply / {1} back / {2} reset*", ("Interact", "Reload", "Ultimate")),
-    ("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
-    ("Inspect: hold {0}; Arcade closed; Travel off or player/bot/attach", ("Crouch",)),
+    ("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+    ("Inspect: hold {0}; Nocturne closed; Travel off or player/bot/attach", ("Crouch",)),
     ("Soundtrack: {0} + {1} / {2}: +10 / -10", ("Crouch", "Ability 1", "Ability 2")),
-    ("Travel ON, Arcade closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
+    ("Travel ON, Nocturne closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
     ("Travel: {0} use / {1} detach | release {2}: close", ("Interact", "Reload", "Crouch")),
     ("Dead: {0} revive | Multijump ON: tap/hold {0} in air", ("Jump",)),
     ("Punch ON: {0} punch | *reset where shown", ("Melee",)),
@@ -40,7 +40,7 @@ INFO_CONTROLS = (
 
 
 def rendered_control_lines(controls):
-    return ["0 - INFO / CONTROLS", "", *(
+    return ["0 - RITES / CONTROLS", "", *(
         literal.format(*(f"<{button.replace(' ', '')}>" for button in buttons))
         for literal, buttons in controls)]
 
@@ -204,7 +204,7 @@ class EnglishMenuLayoutTests(unittest.TestCase):
                 for spins in (20, 1, 0):
                     context.player.update(LuckActive=True, LuckSpinCount=spins)
                     waiting = subtitle.evaluate(context)
-                    self.assertIn("Fate is turning...", waiting)
+                    self.assertIn("The wheel is turning...", waiting)
                     self.assertNotIn("<", waiting)
                     self.assertNotIn("spin /", waiting)
                 context.player["LuckActive"] = False
@@ -234,7 +234,7 @@ class EnglishMenuLayoutTests(unittest.TestCase):
                     else:
                         self.assertIn("<Interact>", rendered_subtitle)
                         self.assertIn("<Melee>", rendered_subtitle)
-                        self.assertTrue(rendered_body.startswith("\n1 - NAME COLOR\n"))
+                        self.assertTrue(rendered_body.startswith("\n1 - MOONLIT NAME COLOR\n"))
                         self.assertIn("White", rendered_body)
                         self.assertNotIn("<Interact>", rendered_body)
 
