@@ -6,14 +6,14 @@ Comandi, menu e interazioni della revisione corrente. Per iniziare usa la [guida
 
 | Contesto | Comando | Azione |
 |---|---|---|
-| Vivo | Melee tenuto 0,5 s | Apre/chiude Arcade |
+| Vivo | Melee tenuto 0,5 s | Apre/chiude Nocturne |
 | Menu con elenco | Crouch + Primary / Secondary | Voce successiva / precedente |
 | Menu aperto | Crouch + Interact | Apre/applica; nel principale alterna ON/OFF per le voci 8, 9, 12 e 15 |
 | Sottomenu | Crouch + Reload | Torna al menu principale |
 | Voce principale selezionata o relativo sottomenu, dove indicato | Crouch + Ultimate | Ripristina i default della sola pagina |
 | Soundtrack | Crouch + Ability 1 / 2 | Salta avanti / indietro di 10 generi |
 | Crouch rilasciato | Interact tenuto 0,5 s | Alterna Camera, anche con menu aperto |
-| Arcade chiuso, Travel OFF o pagine Travel Player/Bot / Attach | Crouch tenuto | Inspection: eroe e HP del bersaglio |
+| Nocturne chiuso, Travel OFF o pagine Travel Player/Bot / Attach | Crouch tenuto | Inspection: eroe e HP del bersaglio |
 | Menu chiuso, Travel ON | Crouch tenuto | Travel & Attach |
 | Travel & Attach | Crouch + Primary / Secondary, poi Interact | Cambia pagina, poi esegue |
 | Attaccato, menu chiuso | Crouch + Reload | Sgancia |
@@ -23,11 +23,13 @@ Comandi, menu e interazioni della revisione corrente. Per iniziare usa la [guida
 
 Ogni pressione dei comandi menu viene consumata una volta; Interact va rilasciato prima di passare da menu a Camera. Da morto il menu resta visibile ma non accetta comandi. Melee resta nativo; con Multijump OFF anche Jump resta nativo da vivi.
 
-Info / Controls mostra i binding personali e resta bianca. Le altre pagine mostrano i comandi contestuali sopra le opzioni. Il titolo `cozywatch.org [countdown]` e HOST sono in alto a destra; il roster è **SOULS & ECHOES** e il leader dei voti **CROWN OF ASH**.
+Rites / Controls mostra i binding personali e resta bianca. Le altre pagine mostrano i comandi contestuali sopra le opzioni. Il titolo `cozywatch.org [countdown]` e HOST sono in alto a destra; il roster è **SOULS & ECHOES** e il leader dei voti **CROWN OF ASH**.
 
 Chi non sceglie un eroe all’ingresso riceve **Shion dopo 60 secondi**, al successivo controllo di un secondo. Poi può cambiarlo liberamente; morti e cambi squadra non riavviano questo timer.
 
 La [tabella dei 21 menu](../README.md#menu-personali) riassume le funzioni disponibili. Soundtrack mostra una preferenza testuale nel roster: non riproduce audio.
+
+I titoli Nocturne usano nomi evocativi per le stesse funzioni: Spectral Camera è la Camera, Blood Debt / Revenge è la rivincita, Deathless è Unkillable, Soul Sigil / Icon sceglie l'icona e Death Punch è il KO melee. Dark Roulette è il nuovo nome di Try Your Luck; Fates conserva i risultati cosmetici privati. La tabella del README riporta tutte le etichette attuali.
 
 ## Ripristino della pagina
 
@@ -56,7 +58,7 @@ Info, Revenge, Luck e i toggle 8, 9, 12 e 15 non offrono questo reset. Il reset 
 
 Presence aggiunge uno stato alla propria riga **Souls & Echoes**, senza creare una targhetta sopra al personaggio. `Unspoken` è il default e non aggiunge testo. Tutti gli stati, compreso `Away beyond the veil`, sono scelte manuali: non rilevano automaticamente l'inattività e non modificano movimento, protezioni o Privacy.
 
-**Fates** offre Moon/Ash, d6, d20, una percentuale intera 1–100% o uno dei sei presagi. Il risultato privato appare sotto Arcade per **3–4 secondi**; il menu indica READY o WAIT. Sono risposte cosmetiche, senza gli effetti fisici di Try Your Luck. Puoi tirare ogni **5 secondi**; il reset rimuove il risultato senza annullare l’attesa.
+**Fates** offre Moon/Ash, d6, d20, una percentuale intera 1–100% o uno dei sei presagi. Il risultato privato appare sotto Nocturne per **3–4 secondi**; il menu indica READY o WAIT. Sono risposte cosmetiche, senza gli effetti fisici di Dark Roulette. Puoi tirare ogni **5 secondi**; il reset rimuove il risultato senza annullare l’attesa.
 
 **Whispers** offre Greeting, Respect, Rose, Embrace e Resonance. Tieni Crouch nella pagina 19 e mira a un altro umano vivo: il nome del destinatario valido compare nel menu. Servono mira entro **12°**, linea di vista libera, Privacy OFF e ricezione ON; **non c’è limite di distanza**. Dummy e AI sono esclusi. Rilasciare Crouch, uscire dalla pagina o morire cancella l’anteprima. L’invio ricontrolla la mira attuale.
 
@@ -68,7 +70,7 @@ Il destinatario riceve il messaggio e il mittente una conferma privata; nel menu
 
 Travel contiene cinque pagine: Teleport Spawn, Teleport Objective, Teleport Player/Bot, Attach e Self Elimination. Con Crouch tenuto, Primary/Secondary cambiano pagina e Interact esegue. I comandi richiedono un giocatore vivo e spawnato; la morte chiude Travel.
 
-Un teletrasporto riuscito interrompe Attach e permette a Multijump di riprendere. Una destinazione rifiutata o un comando Spawn senza spostamento conserva invece l’aggancio. Con Arcade chiuso, **Crouch + Reload** sgancia manualmente.
+Un teletrasporto riuscito interrompe Attach e permette a Multijump di riprendere. Una destinazione rifiutata o un comando Spawn senza spostamento conserva invece l’aggancio. Con Nocturne chiuso, **Crouch + Reload** sgancia manualmente.
 
 Nel menu 2 applicare Your Hero o un bersaglio valido riavvia la Camera, anche se la scelta era già attiva. La Camera si riavvia anche dopo un teletrasporto Travel riuscito o il cambio del proprio eroe. Un bersaglio morto, uscito, privato o in transizione viene revocato. Camera OFF la ferma sempre.
 
@@ -92,13 +94,13 @@ Le 36 icone fluttuano intorno al proprietario, sempre entro **5 m**, seguendone 
 
 ## Privacy e preferenze
 
-Privacy impedisce Camera, inspection, Teleport, Attach e Whispers verso il giocatore e riserva al solo proprietario l’icona fluttuante attiva; l'effetto Vision di Try Your Luck mostra intenzionalmente anche i giocatori privati. Whispers ha inoltre un filtro di ricezione personale indipendente. Preferenze, pagina e cursore persistono tra morte e cambio eroe. **Cambio squadra e uscita/rientro ripartono dai default**, aprendo nuovamente il principale su Info / Controls al completamento della registrazione.
+Privacy impedisce Camera, inspection, Teleport, Attach e Whispers verso il giocatore e riserva al solo proprietario l’icona fluttuante attiva; l'effetto Vision di Dark Roulette mostra intenzionalmente anche i giocatori privati. Whispers ha inoltre un filtro di ricezione personale indipendente. Preferenze, pagina e cursore persistono tra morte e cambio eroe. **Cambio squadra e uscita/rientro ripartono dai default**, aprendo nuovamente il principale su Rites / Controls al completamento della registrazione.
 
 Privacy riguarda le funzioni personalizzate del Workshop: non limita la visuale spettatore o gli strumenti amministrativi nativi.
 
 ## Dummy Target e profilo speciale
 
-I dummy compaiono solo in Schermaglia, al massimo uno per squadra con almeno due slot liberi. Lasciano spazio quando la squadra si riempie. Dopo il teletrasporto iniziale verso un punto sicuro restano fermi, senza inseguire: guardano soltanto il nemico umano vivo più vicino con **Dummy Target ON**. La voce `12 - DUMMY TARGET` mostra `DUMMY GAZE: ON/OFF`; ON richiede un dummy avversario presente, OFF è sempre disponibile. Se il dummy avversario scompare, la preferenza torna OFF entro un secondo e richiede una nuova attivazione. Privacy conserva il proprio significato e non viene modificata da questo consenso. [Dettagli tecnici dei dummy](PROGETTO.md#dummy-e-bot-normali)
+I dummy compaiono solo in Schermaglia, al massimo uno per squadra con almeno due slot liberi. Lasciano spazio quando la squadra si riempie. Dopo il teletrasporto iniziale verso un punto sicuro restano fermi, senza inseguire: guardano soltanto il nemico umano vivo più vicino con **Dummy Target ON**. La voce `12 - DUMMY GAZE` mostra `DUMMY GAZE: ON/OFF`; ON richiede un dummy avversario presente, OFF è sempre disponibile. Se il dummy avversario scompare, la preferenza torna OFF entro un secondo e richiede una nuova attivazione. Privacy conserva il proprio significato e non viene modificata da questo consenso. [Dettagli tecnici dei dummy](PROGETTO.md#dummy-e-bot-normali)
 
 Il nome visibile esatto `งูแรร์` riceve i default modificabili Charcoal / Poison 2 e il Vibes fisso `Draconian`. Il riconoscimento avviene per nome, quindi vale anche per un omonimo.
 

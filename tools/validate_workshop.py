@@ -1581,10 +1581,10 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 info_controls = (
                     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
                     ("+ {0} apply / {1} back / {2} reset*", ("Interact", "Reload", "Ultimate")),
-                    ("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
-                    ("Inspect: hold {0}; Arcade closed; Travel off or player/bot/attach", ("Crouch",)),
+                    ("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+                    ("Inspect: hold {0}; Nocturne closed; Travel off or player/bot/attach", ("Crouch",)),
                     ("Soundtrack: {0} + {1} / {2}: +10 / -10", ("Crouch", "Ability 1", "Ability 2")),
-                    ("Travel ON, Arcade closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
+                    ("Travel ON, Nocturne closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
                     ("Travel: {0} use / {1} detach | release {2}: close", ("Interact", "Reload", "Crouch")),
                     ("Dead: {0} revive | Multijump ON: tap/hold {0} in air", ("Jump",)),
                     ("Punch ON: {0} punch | *reset where shown", ("Melee",)),
@@ -1600,7 +1600,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                                          if binding.args)
                         checks.equal(bindings, tuple(f"Button({button})" for button in buttons),
                                      f"Info: input binding order for {description}")
-                for token in ("0 - INFO / CONTROLS", "0.5s", "camera ({2} released)",
+                for token in ("0 - RITES / CONTROLS", "0.5s", "camera ({2} released)",
                               "Inspect: hold", "+10 / -10", "detach", "revive",
                               "Multijump ON", "Punch ON"):
                     checks.require(token in calls[0].args[2], f"Info: description missing: {token}")
@@ -1612,7 +1612,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                     info_subtitle = (subtitle_branches[1] if subtitle_branches
                                      and subtitle_branches[0] == "Event Player.MainMenuCursor == 0"
                                      else None)
-                    checks.require(bool(info_subtitle) and "0 - INFO / CONTROLS" in info_subtitle,
+                    checks.require(bool(info_subtitle) and "0 - RITES / CONTROLS" in info_subtitle,
                                    "Main Info preview: content must use Subheader")
                     subtitle_colors = parse_top_level_ternary(calls[0].args[7])
                     checks.require(bool(subtitle_colors)
@@ -1755,32 +1755,32 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     main_renderer = rule_by_subroutine(rules, "DrawMainMenu")
     checks.require(main_renderer is not None, "renderer menu principale assente")
     if main_renderer:
-        for token in ("0 - INFO / CONTROLS", "1 - NAME COLOR", "2 - 3P CAMERA",
-                      "3 - SOUNDTRACK", "4 - REVENGE", "5 - UNKILLABLE", "6 - HERO VOICE",
-                      "7 - ICON", "8 - TRAVEL / SELF KILL", "9 - PRIVACY",
-                      "10 - TRY YOUR LUCK", "11 - VOTE", "12 - DUMMY TARGET",
-                      "13 - GHOST / FLY", "14 - MULTIJUMP", "15 - SUPERMAN PUNCH",
-                      "16 - SPEED / GRAVITY", "17 - PRESENCE", "18 - FATES",
+        for token in ("0 - RITES / CONTROLS", "1 - MOONLIT NAME COLOR", "2 - SPECTRAL CAMERA",
+                      "3 - SOUL SOUNDTRACK", "4 - BLOOD DEBT / REVENGE", "5 - DEATHLESS", "6 - ECHO VOICE",
+                      "7 - SOUL SIGIL / ICON", "8 - VEIL TRAVEL / SELF KILL", "9 - PRIVACY VEIL",
+                      "10 - DARK ROULETTE", "11 - CROWN / VOTE", "12 - DUMMY GAZE",
+                      "13 - GHOST / FLY", "14 - SPECTRAL MULTIJUMP", "15 - DEATH PUNCH",
+                      "16 - SPEED / GRAVITY", "17 - SOUL PRESENCE", "18 - FATES",
                       "19 - WHISPERS", "20 - MOONLIT AURA"):
             checks.require(token in main_renderer.body, f"Main menu page missing: {token}")
         for state in ("GhostModeActive", "FlyModeActive", "CrouchTravelEnabled",
                       "InspectionPrivacyActive", "AllowDummyBotFollow"):
             checks.equal(main_renderer.body.count(f"Event Player.{state}"), 1,
                          f"Main menu: one English preview of applied {state}")
-        checks.require("DUMMY GAZE" in main_renderer.body,
+        checks.require('Custom String("DUMMY GAZE: {0}"' in main_renderer.body,
                        "Main menu: Dummy Follow description missing")
-        checks.require('Event Player.MainMenuCursor == 12 ? Custom String("12 - DUMMY TARGET' in main_renderer.body,
+        checks.require('Event Player.MainMenuCursor == 12 ? Custom String("12 - DUMMY GAZE' in main_renderer.body,
                        "pagina 12 e pagina 13 non sono distinte")
         main_hud = next(iter_calls(main_renderer.body, "Create HUD Text"), None)
         subtitle_branches = parse_top_level_ternary(main_hud.args[2]) if main_hud else None
         preview = (subtitle_branches[1] if subtitle_branches
                    and subtitle_branches[0] == "Event Player.MainMenuCursor == 0" else "")
-        checks.require("0 - INFO / CONTROLS" in preview, "Main Info preview: title missing")
+        checks.require("0 - RITES / CONTROLS" in preview, "Main Info preview: title missing")
         preview_controls = (
-            ("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+            ("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
             ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
             ("+ {0}: all controls", ("Interact",)),
-            ("Arcade closed: hold {0} to inspect hero/HP", ("Crouch",)),
+            ("Nocturne closed: hold {0} to inspect hero/HP", ("Crouch",)),
             ("Travel off or player/bot/attach mode", ()),
         )
         for description, buttons in preview_controls:
@@ -2166,7 +2166,7 @@ def validate_super_punch(checks: Checks, source: str, rules: list[Rule], global_
     main = rule_by_subroutine(rules, "DrawMainMenu")
     apply = rule_by_subroutine(rules, "ApplySuperPunchPage")
     if main:
-        for title in ("15 - SUPERMAN PUNCH",):
+        for title in ("15 - DEATH PUNCH",):
             checks.require(f'Event Player.MainMenuCursor == 15 ? Custom String("{title}' in main.body,
                            f"Super Punch: anteprima principale pagina 15 inglese: {title}")
         checks.equal(main.body.count("Array Contains(Global.SuperPunchPlayers, Event Player)"), 1,
@@ -2672,7 +2672,7 @@ def validate_social_beacon(checks: Checks, source: str, rules: list[Rule], globa
                    "Pilar: reset Icon ripristina icona fluttuante ON")
     renderer = rule_by_subroutine(rules, "DrawPlayerIconMenu")
     if renderer is None:
-        renderer = next((rule for rule in rules if "7 - ICON" in rule.body and "IconCursor + 1" in rule.body
+        renderer = next((rule for rule in rules if "7 - SOUL SIGIL / ICON" in rule.body and "IconCursor + 1" in rule.body
                          and len(list(iter_calls(rule.body, "Create HUD Text"))) == 1
                          and subroutine_target(rule) != "DrawMainMenu"), None)
     checks.require(renderer is not None and "FLOATING" in renderer.body
@@ -2803,7 +2803,7 @@ def validate_multijump(checks: Checks, source: str, rules: list[Rule], player_en
     if renderer:
         calls = list(iter_calls(renderer.body, "Create HUD Text"))
         checks.equal(len(calls), 1, "Multijump: unico HUD menu")
-        for token in ("14 - MULTIJUMP", "AIR BOOST", 'Custom String("AIR: TAP/HOLD {0}", Input Binding String(Button(Jump)))'):
+        for token in ("14 - SPECTRAL MULTIJUMP", "AIR BOOST", 'Custom String("AIR: TAP/HOLD {0}", Input Binding String(Button(Jump)))'):
             checks.require(token in renderer.body, f"Multijump: menu inglese {token}")
         checks.equal(renderer.body.count("Event Player.MultijumpCursor * 100"), 1,
                      "Multijump: preview 100..1000% in passi100")
@@ -5143,7 +5143,7 @@ def validate_try_your_luck(checks: Checks, source: str, rules: list[Rule], playe
                          "Heart roulette deve notificare soltanto il proprietario")
             checks.equal(
                 trim_outer_parentheses(heart_messages[0].args[1]),
-                'Custom String("TRY YOUR LUCK: HEART — FULL TEAM HEAL")',
+                'Custom String("DARK ROULETTE: HEART — FULL TEAM HEAL")',
                 "Heart team-heal: unico messaggio inglese senza stato lingua o Local Player",
             )
 

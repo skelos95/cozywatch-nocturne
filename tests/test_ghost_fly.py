@@ -70,7 +70,7 @@ class GhostFlyRuntimeTests(unittest.TestCase):
 
     def test_main_menu_has_twenty_one_pages_and_routes_page_thirteen(self) -> None:
         localized_titles = ("13 - GHOST / FLY",)
-        localized_tails = (("12 - DUMMY TARGET", "13 - GHOST / FLY"),)
+        localized_tails = (("12 - DUMMY GAZE", "13 - GHOST / FLY"),)
         for source, _ in self.sources:
             navigation = rule_with(source, "MainMenuCursor = (Event Player.MainMenuCursor", "MenuCommand == 3")
             self.assertIn(

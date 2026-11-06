@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Titoli dei menu più coerenti con Nocturne: Rites / Controls, Spectral Camera, Blood Debt / Revenge, Deathless, Soul Sigil / Icon e le altre etichette nella tabella del README. Guide e anteprime chiamano il menu Nocturne; numeri, comandi e comportamento restano invariati.
+- Try Your Luck diventa Dark Roulette anche nei messaggi degli effetti. I testi della rotazione parlano della ruota, distinguendola dai dadi e presagi di Fates. Aggiornati i contratti testuali e rigenerati clipboard e riferimenti; stesso budget strutturale, nessun nuovo HUD.
+
 ## 0.8.4 — 2026-11-02
 
 - Quattro menu personali a tema Nocturne: Presence 17, Fates 18, Whispers 19 e Moonlit Aura 20. Le voci precedenti mantengono i propri indici; VERSION passa a 0.8.4; i tag e gli allegati delle release precedenti conservano il codice storico.

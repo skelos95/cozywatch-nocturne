@@ -234,7 +234,7 @@ Il catalogo ha 10 gruppi da 20 generi: ogni gruppo conserva i 10 generi preceden
 
 ## Navigazione nel gioco
 
-Il menu mostra il genere evidenziato, il gruppo e la scelta attiva. Quando il Menu Arcade è aperto, **Crouch è il modificatore obbligatorio** per tutti i comandi del menu:
+Il menu mostra il genere evidenziato, il gruppo e la scelta attiva. Quando il Menu Nocturne è aperto, **Crouch è il modificatore obbligatorio** per tutti i comandi del menu:
 
 - `Crouch + Primary Fire`: genere successivo (`+1`).
 - `Crouch + Secondary Fire`: genere precedente (`−1`).

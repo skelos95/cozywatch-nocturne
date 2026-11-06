@@ -1088,7 +1088,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_info_controls_keep_the_menu_and_camera_bindings(self) -> None:
         info = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawInfoMenu")
-        old = 'Custom String("{0} 0.5s: Arcade | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
+        old = 'Custom String("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
         new = old.replace("Button(Melee)", "Button(Interact)", 1)
         mutated = self.replace_in_rule(info, old, new)
         self.assert_rejected(mutated, "Info")
@@ -1154,8 +1154,8 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         main = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawMainMenu")
         mutated = self.replace_in_rule(
             main,
-            'Event Player.MainMenuCursor == 12 ? Custom String("12 - DUMMY TARGET',
-            'Event Player.MainMenuCursor == 13 ? Custom String("12 - DUMMY TARGET',
+            'Event Player.MainMenuCursor == 12 ? Custom String("12 - DUMMY GAZE',
+            'Event Player.MainMenuCursor == 13 ? Custom String("12 - DUMMY GAZE',
         )
         self.assert_rejected(mutated, "pagina 12 e pagina 13 non sono distinte")
 
@@ -1291,7 +1291,8 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_dummy_target_preview_keeps_the_gaze_label(self) -> None:
         renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawMainMenu")
-        mutated = self.replace_in_rule(renderer, 'DUMMY GAZE', "DUMMY TARGETING")
+        mutated = self.replace_in_rule(renderer, 'Custom String("DUMMY GAZE: {0}"',
+                                       'Custom String("DUMMY TARGETING: {0}"')
         self.assert_rejected(mutated, 'Main menu: Dummy Follow description missing')
 
     def test_page_twelve_has_a_dedicated_menu_tint(self) -> None:

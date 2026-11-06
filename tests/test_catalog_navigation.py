@@ -213,7 +213,7 @@ class CatalogNavigationTests(unittest.TestCase):
             music = validator.rule_by_subroutine(model.rules, "DrawSoundtrackMenu")
             headers = [call for call in validator.iter_calls(music.body, "Custom String")
                        if call.args and (validator.parse_literal(call.args[0]) or "").startswith(
-                           ("3 - SOUNDTRACK ",))]
+                           ("3 - SOUL SOUNDTRACK ",))]
             self.assertEqual(len(headers), 1)
             for cursor in (0, 19, 20, 199):
                 viewer["GenreCursor"] = cursor

@@ -8,7 +8,7 @@
 4. In **Custom Game → Settings → Workshop**, usa **Paste Rules**.
 5. Apri **Script Diagnostics** e annota **Element Count** e **Largest Rule**, insieme al commit importato.
 6. Configura **Skirmish**, fino a 6 slot per squadra e le mappe standard desiderate, escluse quelle Workshop. Scegli la durata **30–60 minuti**, default **30**.
-7. Avvia una nuova lobby. Al primo spawn il principale si apre su **Info / Controls**; **Crouch + Interact** mostra la guida completa.
+7. Avvia una nuova lobby. Al primo spawn il principale si apre su **Rites / Controls**; **Crouch + Interact** mostra la guida completa.
 
 Il file contiene le regole, non il preset delle mappe. Grammatica, identificatori e interfaccia sono in inglese: non tradurre le keyword. Importa soltanto `workshop/ruang_irama.en-US.workshop`; `source/` e `tests/fixtures/` contengono specifiche e riferimenti interni.
 
