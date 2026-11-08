@@ -1657,6 +1657,12 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                                else ("Crouch", "Interact", "Reload", "Melee")):
                     checks.require(f"Input Binding String(Button({button}))" in subtitle,
                                    f"{subroutine_target(rule)}: subtitle binding missing: {button}")
+                if subroutine_target(rule) == "DrawRevengeMenu":
+                    checks.require('Custom String("Hold {0}: {1} next / {2} prev", '
+                                   'Input Binding String(Button(Crouch)), '
+                                   'Input Binding String(Button(Primary Fire)), '
+                                   'Input Binding String(Button(Secondary Fire)))' in subtitle,
+                                   "DrawRevengeMenu: navigation must bind Crouch")
                 if subroutine_target(rule) == "DrawSoundtrackMenu":
                     for button in ("Ability 1", "Ability 2"):
                         checks.require(f"Input Binding String(Button({button}))" in subtitle,

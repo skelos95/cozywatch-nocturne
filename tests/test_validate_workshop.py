@@ -866,7 +866,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
     def test_revenge_no_target_branch_keeps_crouch_help_in_the_subtitle(self) -> None:
         renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawRevengeMenu")
         mutated = self.replace_in_rule(renderer, "Button(Crouch)", "Button(Melee)")
-        self.assert_rejected(mutated, "DrawRevengeMenu: subtitle binding missing: Crouch")
+        self.assert_rejected(mutated, "DrawRevengeMenu: navigation must bind Crouch")
 
     def test_center_above_menus_stays_free_of_global_spacers(self) -> None:
         init = self.rule(lambda rule: rule.name.startswith("00 -"))
