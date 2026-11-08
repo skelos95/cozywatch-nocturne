@@ -844,8 +844,6 @@ def wait_role(rule: Rule, scheduler: Rule | None) -> str | None:
         return "leave ordering"
     if rule.name.startswith("01b -") and event_type(rule) == "Ongoing - Each Player":
         return "lifecycle stages"
-    if "Abort When False" in body and "Button(Melee)" in body:
-        return "menu hold"
     if "Abort When False" in body and "Button(Interact)" in body:
         return "camera hold"
     if "IsClassified" in body and "Is Dummy Bot" in body:
@@ -1581,7 +1579,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 info_controls = (
                     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
                     ("+ {0} apply / {1} back / {2} reset*", ("Interact", "Reload", "Ultimate")),
-                    ("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+                    ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
                     ("Inspect: hold {0}; Nocturne closed; Travel off or player/bot/attach", ("Crouch",)),
                     ("Soundtrack: {0} + {1} / {2}: +10 / -10", ("Crouch", "Ability 1", "Ability 2")),
                     ("Travel ON, Nocturne closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
@@ -1646,11 +1644,12 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                                f"{subroutine_target(rule)}: subtitle cannot start with an artificial blank line")
                 if subroutine_target(rule) != "DrawTravelMenu":
                     close_controls = [custom for custom in iter_calls(subtitle, "Custom String")
-                                      if len(custom.args) == 2
-                                      and parse_literal(custom.args[0]) == "Hold {0} 0.5s: close"
-                                      and custom.args[1].strip() == "Input Binding String(Button(Melee))"]
+                                      if len(custom.args) == 3
+                                      and parse_literal(custom.args[0]) == "Hold {0}: {1} close"
+                                      and custom.args[1].strip() == "Input Binding String(Button(Crouch))"
+                                      and custom.args[2].strip() == "Input Binding String(Button(Melee))"]
                     checks.require(bool(close_controls),
-                                   f"{subroutine_target(rule)}: subtitle close command must bind Melee with a 0.5s hold")
+                                   f"{subroutine_target(rule)}: subtitle close command must bind Crouch + Melee")
                 for button in (("Crouch", "Primary Fire", "Secondary Fire", "Interact", "Reload")
                                if subroutine_target(rule) == "DrawTravelMenu"
                                else ("Crouch", "Interact", "Melee")
@@ -1777,7 +1776,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                    and subtitle_branches[0] == "Event Player.MainMenuCursor == 0" else "")
         checks.require("0 - RITES / CONTROLS" in preview, "Main Info preview: title missing")
         preview_controls = (
-            ("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+            ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
             ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
             ("+ {0}: all controls", ("Interact",)),
             ("Nocturne closed: hold {0} to inspect hero/HP", ("Crouch",)),
@@ -2219,9 +2218,10 @@ def validate_super_punch(checks: Checks, source: str, rules: list[Rule], global_
             ("Global.SuperPunchTarget=Null;", "rilascio scratch target"),
         ):
             checks.require(token in packed, f"Super Punch: {label}")
-        for field in ("IsHuman==False", "IsAutomaticBot==True", "PlayerCycleActive==True", "TeamChangeProcessed==True",
-                      "MeleeConsumed==True"):
+        for field in ("IsHuman==False", "IsAutomaticBot==True", "PlayerCycleActive==True", "TeamChangeProcessed==True"):
             checks.require("Global.ActivePlayer." + field in packed, f"Super Punch: guardia owner {field}")
+        checks.require("MeleeConsumed" not in packed,
+                       "Super Punch: toggle del menu non deve bloccare il pugno")
         checks.require("MenuOpen" not in packed,
                        "Super Punch: menu aperto non deve bloccare l'ayunan")
         checks.require("CrouchTravelActive" not in packed,
@@ -2244,13 +2244,15 @@ def validate_super_punch(checks: Checks, source: str, rules: list[Rule], global_
                       "IsDummyBot(EventPlayer)==False;", "EntityExists(EventPlayer)==True;",
                       "HasSpawned(EventPlayer)==True;", "IsAlive(EventPlayer)==True;",
                       "EventPlayer.PlayerCycleActive==False;", "EventPlayer.TeamChangeProcessed==False;",
-                      "EventPlayer.MeleeConsumed==False;", "Victim!=Null;", "Victim!=EventPlayer;",
+                      "Victim!=Null;", "Victim!=EventPlayer;",
                       "EntityExists(Victim)==True;", "HasSpawned(Victim)==True;", "IsAlive(Victim)==True;"):
             checks.require(token in condition_code, f"Super Punch: guardia impatto {token}")
         checks.require("MenuOpen" not in condition_code,
                        "Super Punch: menu aperto non deve bloccare l'impatto nativo")
         checks.require("CrouchTravelActive" not in condition_code,
                        "Super Punch: Travel attivo non deve bloccare l'impatto nativo")
+        checks.require("MeleeConsumed" not in condition_code,
+                       "Super Punch: toggle del menu non deve bloccare l'impatto nativo")
         impact_code = code(impact.body)
         for token in ("AbortIf(Or(EventPlayer.HudSlot<0,EventPlayer.HudSlot>=CountOf(Global.SuperPunchTimes)));",
                       "AbortIf(Global.SuperPunchTimes[EventPlayer.HudSlot]<0);",
@@ -3682,7 +3684,7 @@ End;
                 locked_values += [parse_literal(call.args[0]) for call in iter_calls(locked, "Custom String")
                                   if call.args]
                 unlocked_values.append(unlocked)
-            checks.equal(tuple(locked_bindings), ("Button(Crouch)", "Button(Reload)", "Button(Melee)"),
+            checks.equal(tuple(locked_bindings), ("Button(Crouch)", "Button(Reload)", "Button(Crouch)", "Button(Melee)"),
                          "Locked Soundtrack: only Crouch, back and close commands")
             checks.require("SOUNDTRACK LOCKED" in locked_values and "NOW: {0}" in locked_values,
                            "Locked Soundtrack: English heading and current value")
@@ -3885,10 +3887,17 @@ def validate_input_contract(checks: Checks, rules: list[Rule]) -> None:
     def code(expression: str) -> str:
         return re.sub(r"\s+", "", mask_strings(expression))
 
-    menu_toggle = next((rule for rule in rules if "Button(Melee)" in rule.body and "Wait(0.500, Abort When False)" in rule.body and "MenuOpen" in rule.body), None)
-    checks.require(menu_toggle is not None, "hold Melee 0,5 s per apertura/chiusura menu assente")
+    menu_toggle = next((rule for rule in rules if rule.name.startswith("05 -") and event_type(rule) == "Ongoing - Each Player"), None)
+    checks.require(menu_toggle is not None, "comando Crouch + Melee per apertura/chiusura menu assente")
     if menu_toggle:
-        checks.equal(event_type(menu_toggle), "Ongoing - Each Player", "hold Melee: evento")
+        conditions = rule_block(menu_toggle, "conditions") or ""
+        for required in ("Is Button Held(Event Player, Button(Crouch)) == True;",
+                         "Is Button Held(Event Player, Button(Melee)) == True;",
+                         "Event Player.MeleeConsumed == False;", "Is Alive(Event Player) == True;"):
+            checks.require(required in conditions, f"toggle menu: condizione mancante {required}")
+        checks.require("Wait(" not in mask_strings(menu_toggle.body), "toggle menu deve essere immediato")
+        checks.require("Event Player.CrouchTravelActive == False;" not in conditions,
+                       "toggle menu deve funzionare anche con Travel aperto")
 
     dispatcher = next((rule for rule in rules if event_type(rule) == "Ongoing - Each Player" and "MenuCommand" in rule.body and all(f"Button({button})" in rule.body for button in MENU_ACTION_BUTTONS)), None)
     checks.require(dispatcher is not None, "dispatcher input menu completo assente")
@@ -4710,7 +4719,6 @@ def validate_scheduler(checks: Checks, source: str, rules: list[Rule], globals_:
         ("scheduler", ("0.050", "Ignore Condition")): 1,
         ("leave ordering", ("0.500", "Ignore Condition")): 1,
         ("bot classification", ("0.016", "Ignore Condition")): 1,
-        ("menu hold", ("0.500", "Abort When False")): 1,
         ("camera hold", ("0.500", "Abort When False")): 1,
         ("lifecycle stages", ("0.050", "Abort When False")): 2,
     })
@@ -6806,8 +6814,7 @@ def validate_privacy(checks: Checks, rules: list[Rule]) -> None:
             rule for rule in rules
             if event_type(rule) == "Ongoing - Each Player"
             and "Event Player.CrouchTravelActive == True;" in rule.body
-            and "Event Player.CrouchTravelActive = False;" in rule.body
-            and "Destroy HUD Text(Event Player.MenuHud);" in rule.body
+            and "Call Subroutine(CloseCrouchTravel);" in rule.body
         ),
         None,
     )
@@ -6815,6 +6822,10 @@ def validate_privacy(checks: Checks, rules: list[Rule]) -> None:
     if teleport_cleanup:
         checks.require("Event Player.LuckPrivacyActive == True" in teleport_cleanup.body,
                        "cleanup Teleport Crouch non reagisce all'avvio di Vision")
+        cleanup = rule_by_subroutine(rules, "CloseCrouchTravel")
+        checks.require(cleanup is not None and "Event Player.CrouchTravelActive = False;" in cleanup.body
+                       and "Destroy HUD Text(Event Player.MenuHud);" in cleanup.body,
+                       "cleanup Teleport Crouch deve rimuovere HUD e stato Travel")
 
 
 def validate_dummy_slot_management(
@@ -7022,7 +7033,7 @@ def validate_bot_isolation(checks: Checks, rules: list[Rule]) -> None:
 
     entrypoints = (
         (next((rule for rule in rules if event_type(rule) == "Ongoing - Each Player" and "PlayerHudCreated" in rule.body and "Create HUD Text(" in rule.body), None), "HUD player", True),
-        (next((rule for rule in rules if event_type(rule) == "Ongoing - Each Player" and "Button(Melee)" in rule.body and "Wait(0.500, Abort When False)" in rule.body and "Call Subroutine(DrawMenu);" in rule.body), None), "toggle menu", True),
+        (next((rule for rule in rules if rule.name.startswith("05 -") and event_type(rule) == "Ongoing - Each Player" and "Call Subroutine(DrawMenu);" in rule.body), None), "toggle menu", True),
         (next((rule for rule in rules if event_type(rule) == "Ongoing - Each Player" and "MenuCommand" in rule.body and all(f"Button({button})" in rule.body for button in MENU_ACTION_BUTTONS)), None), "dispatcher menu", False),
         (next((rule for rule in rules if event_type(rule) == "Ongoing - Each Player" and "Button(Interact)" in rule.body and "Wait(0.500, Abort When False)" in rule.body and "CameraMode" in rule.body), None), "toggle Camera", True),
         (next((rule for rule in rules if event_type(rule) == "Ongoing - Each Player" and "InspectionActive = True;" in rule.body and "Button(Crouch)" in rule.body), None), "inspection Crouch", False),

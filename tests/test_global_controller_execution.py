@@ -240,33 +240,29 @@ class GlobalControllerExecutionTests(unittest.TestCase):
     def model(self):
         return GeneratedControllerEvaluator(runtime.english(RUNTIME.read_text(encoding="utf-8")))
 
-    def test_twelve_players_have_independent_menu_and_camera_hold_deadlines(self):
+    def test_twelve_players_have_independent_combo_presses_and_camera_hold_deadlines(self):
         model = self.model()
         for index in range(12): model.add_player(f"p{index}", slot=index // 2, team=1 + index % 2)
         for step in range(26):
             model.now = round(step * 0.05, 3)
             for index, (identity, state) in enumerate(model.players.items()):
                 start = round(index * 0.05, 3)
-                state["held"] = {"Melee"} if model.now >= start else set()
-                if model.now >= round(start + 0.15, 3): state["held"].add("Interact")
+                state["held"] = {"Crouch", "Melee"} if model.now >= start else set()
+                if model.now >= round(start + 0.15, 3):
+                    state["held"].discard("Crouch")
+                    state["held"].add("Interact")
                 model.tick(identity, "05", "12c")
-                self.assertEqual(state["MenuOpen"], model.now >= round(start + 0.5, 3))
+                self.assertEqual(state["MenuOpen"], model.now >= start)
                 self.assertEqual(state["CameraMode"], int(model.now >= round(start + 0.65, 3)))
 
-    def test_release_aborts_menu_hold_and_next_press_requires_full_half_second(self):
+    def test_melee_alone_does_not_open_but_crouch_combo_opens_immediately(self):
         model = self.model()
         state = model.add_player("p", held={"Melee"})
         model.tick("p", "05")
-        model.now = 0.3
-        state["held"] = set()
-        model.tick("p", "05")
-        model.now = 0.4
-        state["held"] = {"Melee"}
-        model.tick("p", "05")
-        model.now = 0.899
+        model.now = 0.9
         model.tick("p", "05")
         self.assertFalse(state["MenuOpen"])
-        model.now = 0.9
+        state["held"].add("Crouch")
         model.tick("p", "05")
         self.assertTrue(state["MenuOpen"])
 
@@ -284,7 +280,7 @@ class GlobalControllerExecutionTests(unittest.TestCase):
         model.tick("p", "05c", "05d")
         self.assertEqual(state["MenuCommand"], 3)
 
-    def test_team_quarantine_cancels_old_hold_and_reused_slot_starts_fresh(self):
+    def test_team_quarantine_cancels_old_camera_hold_and_reused_slot_starts_fresh(self):
         model = self.model()
         old = model.add_player("old", held={"Melee", "Interact"})
         model.tick("old", "05", "12c")
@@ -299,12 +295,8 @@ class GlobalControllerExecutionTests(unittest.TestCase):
         emitted = [call[1] for call in model.native_calls[before:]]
         self.assertNotIn("CallSubroutine(Controller05)", emitted)
         self.assertNotIn("CallSubroutine(Controller12c)", emitted)
-        replacement = model.add_player("replacement", slot=old["slot"], team=2, held={"Melee"})
-        model.tick("replacement", "05")
-        model.now = 0.5
-        model.tick("replacement", "05")
-        self.assertFalse(replacement["MenuOpen"])
-        model.now = 0.8
+        replacement = model.add_player("replacement", slot=old["slot"], team=2,
+                                       held={"Crouch", "Melee"})
         model.tick("replacement", "05")
         self.assertTrue(replacement["MenuOpen"])
 

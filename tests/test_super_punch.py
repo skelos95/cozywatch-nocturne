@@ -282,8 +282,8 @@ class SuperPunchTests(unittest.TestCase):
                         model.swing("attacker")
                         self.assertEqual(model.kills, [])
 
-    def test_input_consumption_quarantine_and_invalid_actor_cancel_the_in_progress_swing(self):
-        blocked = ({"MeleeConsumed": True}, {"PlayerCycleActive": True},
+    def test_quarantine_and_invalid_actor_cancel_the_in_progress_swing(self):
+        blocked = ({"PlayerCycleActive": True},
                    {"TeamChangeProcessed": True}, {"alive": False},
                    {"spawned": False}, {"exists": False}, {"IsHuman": False},
                    {"IsAutomaticBot": True}, {"dummy": True})
@@ -491,27 +491,30 @@ class SuperPunchTests(unittest.TestCase):
                             model.native_hit("attacker", "target", now=100.01)
                             self.assertEqual(model.kills, [])
 
-    def test_open_menu_hold_consumption_still_requires_a_new_melee_swing(self):
+    def test_menu_shortcut_consumption_does_not_block_one_punch_per_swing(self):
         for source, model in self.models():
             with self.subTest(source=source):
                 attacker = model.add("attacker", MenuOpen=True, MenuPage=15)
                 target = model.add("target", team=2, position=Vector(0, 0, 1))
                 model.enable("attacker")
-                # The existing 0.5 s menu toggle owns this latch until release.
+                # Menu and Death Punch have independent per-press/swing latches.
                 attacker.update(melee=True, MeleeConsumed=True)
                 model.tick("attacker", 100)
                 model.native_hit("attacker", "target", now=100.01)
-                self.assertEqual((model.probes, model.kills), (0, []))
+                self.assertEqual((model.probes, model.kills),
+                                 (1, [("target", "attacker", 100)]))
+                target["alive"] = True
                 attacker["MeleeConsumed"] = False
                 model.tick("attacker", 100.1)
                 model.native_hit("attacker", "target", now=100.11)
-                self.assertEqual((model.probes, model.kills), (0, []))
+                self.assertEqual(len(model.kills), 1)
                 attacker["melee"] = False
                 model.tick("attacker", 100.2)
                 attacker["melee"] = True
                 model.tick("attacker", 101)
-                self.assertEqual(model.kills, [("target", "attacker", 101)])
-                self.assertEqual(target["RevengeDebts"], [1])
+                self.assertEqual(model.kills, [("target", "attacker", 100),
+                                               ("target", "attacker", 101)])
+                self.assertEqual(target["RevengeDebts"], [2])
                 self.assertTrue(attacker["MenuOpen"])
 
     def test_native_impact_shares_consumption_and_ignores_non_melee_damage(self):
@@ -534,8 +537,8 @@ class SuperPunchTests(unittest.TestCase):
                 self.assertFalse(ally["alive"])
                 self.assertTrue(enemy["alive"])
 
-    def test_native_impact_obeys_off_state_lifecycle_input_latch_and_unkillable(self):
-        blocked = ({"MeleeConsumed": True}, {"PlayerCycleActive": True},
+    def test_native_impact_obeys_off_state_lifecycle_and_unkillable(self):
+        blocked = ({"PlayerCycleActive": True},
                    {"TeamChangeProcessed": True}, {"alive": False}, {"IsHuman": False},
                    {"dummy": True}, {"IsAutomaticBot": True})
         for path, _, _ in SOURCES:

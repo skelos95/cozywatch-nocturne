@@ -15,7 +15,7 @@ from tests.test_roster_rejoin_regressions import SOURCES
 
 FIELDS = {
     "LuckEffectHud": ("TemporaryEffectHudIds", "HUD Text", "98a -"),
-    "TravelText": ("TemporaryTravelTextIds", "In-World Text", "19g -"),
+    "TravelText": ("TemporaryTravelTextIds", "In-World Text", "CloseCrouchTravel"),
     "LuckVisionText": ("TemporaryVisionTextIds", "In-World Text", "18j -"),
 }
 REGISTRY = ("TemporaryTextOwners",) + tuple(value[0] for value in FIELDS.values())
@@ -56,7 +56,9 @@ class TransientSourceEvaluator(AuditLifecycleEvaluator):
             if guard is None:
                 raise AssertionError(f"creator cannot wake when registry capacity returns: {field}")
             self.capacity[field] = guard
-            closer = next(rule for rule in self.rules if rule.name.startswith(close_prefix))
+            closer = (validator.rule_by_subroutine(self.rules, close_prefix)
+                      if close_prefix == "CloseCrouchTravel" else
+                      next(rule for rule in self.rules if rule.name.startswith(close_prefix)))
             self.closers[field] = project(statements(validator.rule_block(closer, "actions")),
                                           self.keep(field))
 

@@ -127,6 +127,8 @@ class TravelControllerEvaluator(GeneratedControllerEvaluator):
                         if match[2] != "=":
                             value = self.expression(f"{match[1]}{match[2][0]}({match[3]})")
                         self.assign(match[1], value)
+                    elif statement == "CallSubroutine(CloseCrouchTravel)":
+                        self.execute(semantic.rule_by_subroutine(self.rules, "CloseCrouchTravel"))
                     elif statement.startswith(self.ENGINE_ACTIONS):
                         self.native_calls.append((self.globals["TriggerPlayer"], statement, self.now))
                     else:

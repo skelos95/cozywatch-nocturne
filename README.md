@@ -18,7 +18,7 @@ Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento l
 
 | Azione | Comando |
 |---|---|
-| Apri/chiudi Nocturne | Tieni Melee per 0,5 s da vivo |
+| Apri/chiudi Nocturne | Tieni Crouch e premi Melee da vivo; immediato, anche da Travel |
 | Scorri un elenco | Crouch + Primary / Secondary |
 | Apri, applica o alterna ON/OFF | Crouch + Interact |
 | Torna al principale da un sottomenu | Crouch + Reload |
@@ -27,7 +27,7 @@ Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento l
 | Apri Travel & Attach | Tieni Crouch con Nocturne chiuso e Travel ON |
 | Resuscita | Jump da morto |
 
-I comandi usano i tuoi binding. Ogni pressione viene consumata una volta: rilascia Interact prima di passare dal menu alla Camera. Da morto il menu rimane visibile ma non accetta comandi. [Comandi completi e contesti](docs/MANUALE.md#comandi).
+I comandi usano i tuoi binding. Ogni pressione viene consumata una volta: rilascia Melee prima di alternare di nuovo Nocturne e Interact prima di passare dal menu alla Camera. Melee e Death Punch funzionano anche con Crouch tenuto: con Death Punch attivo la stessa pressione può alternare il menu ed eseguire il KO su un bersaglio valido. Da morto il menu rimane visibile ma non accetta comandi. [Comandi completi e contesti](docs/MANUALE.md#comandi).
 
 ## Menu personali
 
