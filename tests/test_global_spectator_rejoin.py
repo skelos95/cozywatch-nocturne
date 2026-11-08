@@ -210,6 +210,12 @@ class SpectatorRuntimeEvaluator(EventQueueEvaluator):
                     for value in range(*[int(self.expression(arg)) for arg in args[1:]]):
                         self.globals[args[0]] = value
                         if sequence(node[2]): return True
+                elif node[0] == "forplayer":
+                    args = semantic.split_top_level(node[1], ",")
+                    owner = self.expression(args[0])
+                    for value in range(*[int(self.expression(arg)) for arg in args[2:]]):
+                        self.players[owner][args[1]] = value
+                        if sequence(node[2]): return True
                 else:
                     statement = node[1]
                     if statement == "Abort": return True

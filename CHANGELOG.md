@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Titoli dei menu più coerenti con Nocturne: Rites / Controls, Spectral Camera, Blood Debt / Revenge, Deathless, Soul Sigil / Icon e le altre etichette nella tabella del README. Guide e anteprime chiamano il menu Nocturne; numeri, comandi e comportamento restano invariati.
+- Titoli dei menu più coerenti con Nocturne: Rites / Controls, Spectral Camera, Blood Debt / Revenge, Deathless, Soul Sigil / Icon e le altre etichette nella tabella del README. Guide e anteprime chiamano il menu Nocturne; gli indici e le funzioni delle pagine restano invariati.
 - Try Your Luck diventa Dark Roulette anche nei messaggi degli effetti. I testi della rotazione parlano della ruota, distinguendola dai dadi e presagi di Fates. Aggiornati i contratti testuali e rigenerati clipboard e riferimenti; stesso budget strutturale, nessun nuovo HUD.
+- Apertura/chiusura Nocturne immediata con Crouch tenuto + pressione Melee, senza l’attesa di 0,5 s. Una sola azione per pressione: rilasciare Melee per riarmare. La combo funziona anche da Travel, chiudendone l’interfaccia senza applicare la scelta né sganciare Attach. Melee e Death Punch funzionano anche con Crouch tenuto: se Death Punch è attivo, la stessa pressione può alternare il menu ed eseguire un KO valido, rispettando Unkillable e il limite di un contatto per attacco. Aggiornate guide e regressioni; la Camera conserva Interact tenuto 0,5 s.
 
 ## 0.8.4 — 2026-11-02
 

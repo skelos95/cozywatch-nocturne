@@ -20,7 +20,7 @@ class DummyBotFeatureTests(unittest.TestCase):
         for source, global_name in ((self.it, "Global"), (self.en, "Global")):
             self.assertIn('Custom String("cozywatch.org [{0}]"', source)
             self.assertIn('"Nocturne closed: hold {0} to inspect hero/HP"', source)
-            self.assertIn('"{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)"', source)
+            self.assertIn('"{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)"', source)
             self.assertIn("Input Binding String(Button(Crouch))", source)
             self.assertIn("Input Binding String(Button(Melee))", source)
             self.assertIn("Input Binding String(Button(Interact))", source)

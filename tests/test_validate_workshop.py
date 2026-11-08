@@ -763,7 +763,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         mutated = self.replace_call_argument(absolute, 3, f"{condition} ? {info} : {duplicate}")
         self.assert_rejected(mutated, "DrawMainMenu: function Text must not duplicate input hints")
 
-    def test_main_menu_subtitle_keeps_actual_bindings_and_the_close_hold(self) -> None:
+    def test_main_menu_subtitle_keeps_actual_bindings_and_the_close_combo(self) -> None:
         renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawMainMenu")
         call = next(validator.iter_calls(renderer.body, "Create HUD Text"))
         condition, info, commands = validator.parse_top_level_ternary(call.args[2])
@@ -772,14 +772,14 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         self.assert_rejected(self.replace_call_argument(absolute, 2, f"{condition} ? {info} : {changed}"),
                              "DrawMainMenu: subtitle binding missing: Crouch")
         for old, new, error in (
-            ('Custom String("Hold {0} 0.5s: close", Input Binding String(Button(Melee)))',
-             'Custom String("Hold {0} 0.1s: close", Input Binding String(Button(Melee)))',
-             "DrawMainMenu: subtitle close command must bind Melee with a 0.5s hold"),
+            ('Custom String("Hold {0}: {1} close", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee)))',
+             'Custom String("Hold {0}: {1} close", Input Binding String(Button(Crouch)), Input Binding String(Button(Jump)))',
+             "DrawMainMenu: subtitle close command"),
         ):
             with self.subTest(command=old):
                 self.assert_rejected(self.replace_in_rule(renderer, old, new), error)
 
-    def test_info_menu_close_help_keeps_the_half_second_hold(self) -> None:
+    def test_info_menu_camera_help_keeps_the_half_second_hold(self) -> None:
         renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawInfoMenu")
         changed = renderer.body.replace("0.5s", "0.1s")
         mutated = self.source[:renderer.start] + changed + self.source[renderer.end:]
@@ -866,7 +866,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
     def test_revenge_no_target_branch_keeps_crouch_help_in_the_subtitle(self) -> None:
         renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawRevengeMenu")
         mutated = self.replace_in_rule(renderer, "Button(Crouch)", "Button(Melee)")
-        self.assert_rejected(mutated, "DrawRevengeMenu: subtitle binding missing: Crouch")
+        self.assert_rejected(mutated, "DrawRevengeMenu: navigation must bind Crouch")
 
     def test_center_above_menus_stays_free_of_global_spacers(self) -> None:
         init = self.rule(lambda rule: rule.name.startswith("00 -"))
@@ -1088,7 +1088,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_info_controls_keep_the_menu_and_camera_bindings(self) -> None:
         info = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawInfoMenu")
-        old = 'Custom String("{0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
+        old = 'Custom String("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
         new = old.replace("Button(Melee)", "Button(Interact)", 1)
         mutated = self.replace_in_rule(info, old, new)
         self.assert_rejected(mutated, "Info")
@@ -1348,7 +1348,9 @@ class SemanticWorkshop081Tests(unittest.TestCase):
             (runtime, "If(Is Meleeing(Global.ActivePlayer) == False);",
              "Abort If(Global.ActivePlayer.MenuOpen == True);\n\t\tIf(Is Meleeing(Global.ActivePlayer) == False);",
              "menu aperto non deve bloccare l'ayunan"),
-            (runtime, "Global.ActivePlayer.MeleeConsumed == True", "False", "guardia owner MeleeConsumed"),
+            (runtime, "If(Is Meleeing(Global.ActivePlayer) == False);",
+             "Abort If(Global.ActivePlayer.MeleeConsumed == True);\n\t\tIf(Is Meleeing(Global.ActivePlayer) == False);",
+             "toggle del menu non deve bloccare il pugno"),
             (runtime, "If(Is Meleeing(Global.ActivePlayer) == False);",
              "Abort If(Global.ActivePlayer.CrouchTravelActive == True);\n\t\tIf(Is Meleeing(Global.ActivePlayer) == False);",
              "Travel attivo non deve bloccare l'ayunan"),
@@ -1356,7 +1358,9 @@ class SemanticWorkshop081Tests(unittest.TestCase):
             (impact, "Event Ability == Button(Melee);",
              "Event Player.MenuOpen == False;\n\t\tEvent Ability == Button(Melee);",
              "menu aperto non deve bloccare l'impatto nativo"),
-            (impact, "Event Player.MeleeConsumed == False;", "", "guardia impatto"),
+            (impact, "Event Ability == Button(Melee);",
+             "Event Player.MeleeConsumed == False;\n\t\tEvent Ability == Button(Melee);",
+             "toggle del menu non deve bloccare l'impatto nativo"),
             (impact, "Event Ability == Button(Melee);",
              "Event Player.CrouchTravelActive == False;\n\t\tEvent Ability == Button(Melee);",
              "Travel attivo non deve bloccare l'impatto nativo"),
@@ -1458,6 +1462,27 @@ class SemanticWorkshop081Tests(unittest.TestCase):
             'Small Message(Local Player, Custom String("leak"));',
         )
         self.assert_rejected(mutated, "scratch globale o viewer locale")
+
+    def test_menu_toggle_requires_both_buttons_latch_and_alive_owner(self) -> None:
+        toggle = self.rule(lambda rule: rule.name.startswith("05 -"))
+        for condition in (
+            "Is Button Held(Event Player, Button(Crouch)) == True;",
+            "Is Button Held(Event Player, Button(Melee)) == True;",
+            "Event Player.MeleeConsumed == False;",
+            "Is Alive(Event Player) == True;",
+        ):
+            with self.subTest(condition=condition):
+                self.assert_rejected(self.replace_in_rule(toggle, condition, ""),
+                                     "toggle menu: condizione mancante")
+
+    def test_menu_toggle_cannot_regain_a_hold_delay_or_reject_active_travel(self) -> None:
+        toggle = self.rule(lambda rule: rule.name.startswith("05 -"))
+        self.assert_rejected(self.inject_action(toggle, "Wait(0.500, Abort When False);"),
+                             "toggle menu deve essere immediato")
+        mutated = self.replace_in_rule(toggle, "Event Player.LuckActive == False;",
+                                       "Event Player.LuckActive == False;\n"
+                                       "\t\tEvent Player.CrouchTravelActive == False;")
+        self.assert_rejected(mutated, "toggle menu deve funzionare anche con Travel aperto")
 
     def test_menu_dispatch_requires_crouch(self) -> None:
         dispatcher = self.rule(lambda rule: validator.event_type(rule) == "Ongoing - Each Player" and "MenuCommand" in rule.body and "Button(Ability 2)" in rule.body)
@@ -4108,8 +4133,7 @@ rule("999x - Nasib: Renderer pemain tambahan")
         cleanup = self.rule(
             lambda rule: validator.event_type(rule) == "Ongoing - Each Player"
             and "Event Player.CrouchTravelActive == True;" in rule.body
-            and "Event Player.CrouchTravelActive = False;" in rule.body
-            and "Destroy HUD Text(Event Player.MenuHud);" in rule.body
+            and "Call Subroutine(CloseCrouchTravel);" in rule.body
         )
         mutated = self.replace_in_rule(
             cleanup,

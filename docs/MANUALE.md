@@ -6,7 +6,7 @@ Comandi, menu e interazioni della revisione corrente. Per iniziare usa la [guida
 
 | Contesto | Comando | Azione |
 |---|---|---|
-| Vivo | Melee tenuto 0,5 s | Apre/chiude Nocturne |
+| Vivo, anche con Travel aperto | Tieni Crouch e premi Melee | Apre/chiude Nocturne subito, una volta per pressione |
 | Menu con elenco | Crouch + Primary / Secondary | Voce successiva / precedente |
 | Menu aperto | Crouch + Interact | Apre/applica; nel principale alterna ON/OFF per le voci 8, 9, 12 e 15 |
 | Sottomenu | Crouch + Reload | Torna al menu principale |
@@ -19,9 +19,9 @@ Comandi, menu e interazioni della revisione corrente. Per iniziare usa la [guida
 | Attaccato, menu chiuso | Crouch + Reload | Sgancia |
 | Morto | Jump | Resuscita sul posto sicuro o recupera dal vuoto |
 | Vivo, Multijump ON | Premi o tieni Jump in aria, anche con menu aperto | Salti aggiuntivi con la forza scelta |
-| Vivo, Superman Punch ON | Attacco melee, anche con menu aperto | KO ravvicinato, anche sui compagni; rispetta Unkillable |
+| Vivo, Death Punch ON | Melee, anche con Crouch tenuto e menu aperto | KO ravvicinato, anche sui compagni; Crouch + Melee alterna anche il menu; rispetta Unkillable |
 
-Ogni pressione dei comandi menu viene consumata una volta; Interact va rilasciato prima di passare da menu a Camera. Da morto il menu resta visibile ma non accetta comandi. Melee resta nativo; con Multijump OFF anche Jump resta nativo da vivi.
+Ogni pressione dei comandi menu viene consumata una volta; rilascia Melee prima di aprire o chiudere di nuovo Nocturne e Interact prima di passare da menu a Camera. Melee resta un attacco anche con Crouch tenuto. Con Death Punch attivo, Crouch + Melee può alternare subito il menu ed eseguire il KO durante lo stesso attacco; restano necessari un bersaglio valido e le normali verifiche di protezione. Da morto il menu resta visibile ma non accetta comandi; con Multijump OFF Jump resta nativo da vivi.
 
 Rites / Controls mostra i binding personali e resta bianca. Le altre pagine mostrano i comandi contestuali sopra le opzioni. Il titolo `cozywatch.org [countdown]` e HOST sono in alto a destra; il roster è **SOULS & ECHOES** e il leader dei voti **CROWN OF ASH**.
 
@@ -68,7 +68,7 @@ Il destinatario riceve il messaggio e il mittente una conferma privata; nel menu
 
 ## Travel e Camera
 
-Travel contiene cinque pagine: Teleport Spawn, Teleport Objective, Teleport Player/Bot, Attach e Self Elimination. Con Crouch tenuto, Primary/Secondary cambiano pagina e Interact esegue. I comandi richiedono un giocatore vivo e spawnato; la morte chiude Travel.
+Travel contiene cinque pagine: Teleport Spawn, Teleport Objective, Teleport Player/Bot, Attach e Self Elimination. Con Crouch tenuto, Primary/Secondary cambiano pagina e Interact esegue. Crouch + Melee apre subito Nocturne anche da Travel: chiude la sola interfaccia Travel, senza applicarne la scelta né interrompere Attach. I comandi richiedono un giocatore vivo e spawnato; la morte chiude Travel.
 
 Un teletrasporto riuscito interrompe Attach e permette a Multijump di riprendere. Una destinazione rifiutata o un comando Spawn senza spostamento conserva invece l’aggancio. Con Nocturne chiuso, **Crouch + Reload** sgancia manualmente.
 
@@ -82,7 +82,7 @@ Ghost attraversa pareti e soffitti mantenendo il pavimento. Applicare o alternar
 
 Multijump aggiunge salti in aria premendo Jump o tenendolo premuto: la ripetizione avviene ogni 0,3 s e il valore scelto resta fisso. Funziona anche con un menu aperto; si sospende con Attach, Fly o Luck Acceleration. La percentuale indica la spinta verticale del salto aggiuntivo, non l'altezza in metri. Ogni salto valido mostra un breve anello RGB arcobaleno sotto i piedi; i comandi dei menu non generano effetti visivi.
 
-Superman Punch è inizialmente OFF e funziona anche con il menu principale, un sottomenu o Travel aperto, usando Melee. Durante un attacco melee cerca subito un bersaglio vicino davanti, anche della propria squadra, senza attraversare muri. Un impatto melee nativo sui nemici viene riconosciuto anche fra due aggiornamenti dell'animazione. Un solo contatto per attacco, rispettando Unkillable. Revenge registra anche queste uccisioni fra umani alleati. La preferenza si conserva dopo morte o cambio eroe e torna OFF al cambio squadra o all'uscita.
+Death Punch è inizialmente OFF e funziona anche con il menu principale, un sottomenu o Travel aperto, usando Melee anche con Crouch tenuto. Crouch + Melee alterna subito il menu senza annullare Death Punch: la stessa pressione può aprire o chiudere Nocturne ed eseguire un KO su un bersaglio valido. Durante un attacco melee cerca subito un bersaglio vicino davanti, anche della propria squadra, senza attraversare muri. Un impatto melee nativo sui nemici viene riconosciuto anche fra due aggiornamenti dell'animazione. Un solo contatto per attacco, rispettando Unkillable. Revenge registra anche queste uccisioni fra umani alleati. La preferenza si conserva dopo morte o cambio eroe e torna OFF al cambio squadra o all'uscita.
 
 ## Tema, colori e icone
 

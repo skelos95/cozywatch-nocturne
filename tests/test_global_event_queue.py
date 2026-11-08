@@ -121,6 +121,12 @@ class EventQueueEvaluator(GeneratedControllerEvaluator):
                         raise AssertionError("unclosed emitted loop")
                     result.append(("for", value[18:-1], children))
                     index = end + 1
+                elif value.startswith("ForPlayerVariable("):
+                    children, end = block(index + 1)
+                    if statements[end] != "End":
+                        raise AssertionError("unclosed emitted player loop")
+                    result.append(("forplayer", value[18:-1], children))
+                    index = end + 1
                 else:
                     result.append(("action", value))
                     index += 1
