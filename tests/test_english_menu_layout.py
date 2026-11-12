@@ -20,7 +20,7 @@ ARTIFACTS = (*[path for path, _, _ in SOURCES],
 MENU_PREFIXES = ("91a", "91b", "91c", "91d", "91f", "91g", "91h",
                  "91i", "91j", "91n", "91o", "91s", "91t", "91v")
 MAIN_INFO_CONTROLS = (
-    ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+    ("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
     ("+ {0}: all controls", ("Interact",)),
     ("Nocturne closed: hold {0} to inspect hero/HP", ("Crouch",)),
@@ -29,7 +29,7 @@ MAIN_INFO_CONTROLS = (
 INFO_CONTROLS = (
     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
     ("+ {0} apply / {1} back / {2} reset*", ("Interact", "Reload", "Ultimate")),
-    ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+    ("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
     ("Inspect: hold {0}; Nocturne closed; Travel off or player/bot/attach", ("Crouch",)),
     ("Soundtrack: {0} + {1} / {2}: +10 / -10", ("Crouch", "Ability 1", "Ability 2")),
     ("Travel ON, Nocturne closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
