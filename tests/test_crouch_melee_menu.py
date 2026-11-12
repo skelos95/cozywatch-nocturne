@@ -12,6 +12,9 @@ from tests.test_fly_motion import Vector
 from tools import validate_global_runtime as runtime
 
 
+MENU_COMBO = {"Crouch", "Melee"}
+
+
 class ShortcutRuntimeEvaluator(SpectatorRuntimeEvaluator):
     def __init__(self, source):
         self.button_actions = []
@@ -48,6 +51,10 @@ class ShortcutRuntimeEvaluator(SpectatorRuntimeEvaluator):
         self.globals.update(TriggerPlayer=owner, ActivePlayer=owner)
         self.run("ProcessGlobalController")
 
+    def hold_menu_combo(self, owner):
+        self.input(owner, MENU_COMBO)
+        self.input(owner, MENU_COMBO, now=self.now + 0.5)
+
 
 class CrouchMeleeMenuTests(unittest.TestCase):
     def model(self, **changes):
@@ -55,20 +62,52 @@ class CrouchMeleeMenuTests(unittest.TestCase):
         owner = model.ready_player("owner", **changes)
         return model, owner
 
-    def test_combo_opens_immediately_without_a_half_second_hold(self):
+    def test_combo_opens_and_closes_after_a_half_second_hold(self):
         model, owner = self.model()
-        model.input("owner", {"Crouch", "Melee"}, now=10)
+        model.input("owner", MENU_COMBO, now=10)
+        self.assertFalse(owner["MenuOpen"])
+        model.input("owner", MENU_COMBO, now=10.499)
+        self.assertFalse(owner["MenuOpen"])
+        self.assertFalse(owner["MeleeConsumed"])
+        model.input("owner", MENU_COMBO, now=10.5)
         self.assertTrue(owner["MenuOpen"])
         self.assertEqual(owner["MenuPage"], -1)
         self.assertTrue(owner["MeleeConsumed"])
-        self.assertIn(owner["MenuHud"], model.resources)
+        hud = owner["MenuHud"]
+        self.assertIn(hud, model.resources)
+
+        model.input("owner", {"Crouch"})
+        model.input("owner", MENU_COMBO, now=11)
+        self.assertTrue(owner["MenuOpen"])
+        model.input("owner", MENU_COMBO, now=11.499)
+        self.assertTrue(owner["MenuOpen"])
+        self.assertEqual(owner["MenuHud"], hud)
+        self.assertFalse(owner["MeleeConsumed"])
+        model.input("owner", MENU_COMBO, now=11.5)
+        self.assertFalse(owner["MenuOpen"])
+        self.assertIn(hud, model.destroyed)
+        self.assertTrue(owner["MeleeConsumed"])
+
+    def test_releasing_either_button_restarts_the_half_second_hold(self):
+        for still_held in ({"Crouch"}, {"Melee"}):
+            with self.subTest(still_held=still_held):
+                model, owner = self.model()
+                model.input("owner", MENU_COMBO, now=10)
+                model.input("owner", still_held, now=10.4)
+                model.input("owner", MENU_COMBO, now=10.45)
+                model.input("owner", MENU_COMBO, now=10.5)
+                self.assertFalse(owner["MenuOpen"])
+                model.input("owner", MENU_COMBO, now=10.949)
+                self.assertFalse(owner["MenuOpen"])
+                model.input("owner", MENU_COMBO, now=10.95)
+                self.assertTrue(owner["MenuOpen"])
 
     def test_melee_alone_never_opens_or_closes_the_menu(self):
         for opened in (False, True):
             with self.subTest(opened=opened):
                 model, owner = self.model()
                 if opened:
-                    model.input("owner", {"Crouch", "Melee"})
+                    model.hold_menu_combo("owner")
                     model.input("owner", set())
                 original_hud = owner["MenuHud"]
                 for now in (10, 10.1, 10.5, 12):
@@ -82,7 +121,12 @@ class CrouchMeleeMenuTests(unittest.TestCase):
         self.assertTrue(owner["CrouchTravelActive"])
         old_hud = owner["MenuHud"]
         before = len(model.native_log)
-        model.input("owner", {"Crouch", "Melee"})
+        model.input("owner", MENU_COMBO, now=10)
+        model.input("owner", MENU_COMBO, now=10.499)
+        self.assertFalse(owner["MenuOpen"])
+        self.assertTrue(owner["CrouchTravelActive"])
+        self.assertEqual(owner["MenuHud"], old_hud)
+        model.input("owner", MENU_COMBO, now=10.5)
         self.assertTrue(owner["MenuOpen"])
         self.assertFalse(owner["CrouchTravelActive"])
         self.assertIn(old_hud, model.destroyed)
@@ -97,49 +141,57 @@ class CrouchMeleeMenuTests(unittest.TestCase):
 
     def test_simultaneous_combo_has_priority_over_travel_opening(self):
         model, owner = self.model(CrouchTravelEnabled=True)
-        model.input("owner", {"Crouch", "Melee"})
+        model.input("owner", MENU_COMBO, now=10)
+        self.assertFalse(owner["MenuOpen"])
+        self.assertFalse(owner["CrouchTravelActive"])
+        model.input("owner", MENU_COMBO, now=10.5)
         self.assertTrue(owner["MenuOpen"])
         self.assertFalse(owner["CrouchTravelActive"])
 
     def test_held_melee_cannot_toggle_again_by_repressing_crouch(self):
         model, owner = self.model()
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         hud = owner["MenuHud"]
-        for held in ({"Crouch", "Melee"}, {"Melee"}, {"Crouch", "Melee"}):
+        for held in (MENU_COMBO, {"Melee"}, MENU_COMBO):
             model.input("owner", held)
             self.assertTrue(owner["MenuOpen"])
             self.assertEqual(owner["MenuHud"], hud)
+        model.input("owner", MENU_COMBO, now=model.now + 0.5)
+        self.assertTrue(owner["MenuOpen"])
+        self.assertEqual(owner["MenuHud"], hud)
 
     def test_melee_pressed_before_crouch_also_opens_the_combo_once(self):
         model, owner = self.model()
         model.input("owner", {"Melee"})
         self.assertFalse(owner["MenuOpen"])
-        model.input("owner", {"Crouch", "Melee"})
+        model.input("owner", MENU_COMBO, now=10)
+        self.assertFalse(owner["MenuOpen"])
+        model.input("owner", MENU_COMBO, now=10.5)
         self.assertTrue(owner["MenuOpen"])
-        model.input("owner", {"Crouch", "Melee"})
+        model.input("owner", MENU_COMBO, now=11)
         self.assertTrue(owner["MenuOpen"])
 
     def test_melee_release_rearms_one_close_and_one_new_open(self):
         model, owner = self.model()
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         first_hud = owner["MenuHud"]
         model.input("owner", {"Crouch"})
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         self.assertFalse(owner["MenuOpen"])
         self.assertIn(first_hud, model.destroyed)
         self.assertTrue(owner["MeleeConsumed"])
-        model.input("owner", {"Crouch", "Melee"})
+        model.input("owner", MENU_COMBO, now=model.now + 0.5)
         self.assertFalse(owner["MenuOpen"])
         model.input("owner", {"Crouch"})
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         self.assertTrue(owner["MenuOpen"])
         self.assertNotEqual(owner["MenuHud"], first_hud)
 
     def test_closing_while_travel_is_enabled_does_not_open_travel_in_the_same_tick(self):
         model, owner = self.model(CrouchTravelEnabled=True)
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         model.input("owner", {"Crouch"})
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         self.assertFalse(owner["MenuOpen"])
         self.assertFalse(owner["CrouchTravelActive"])
         self.assertIsNone(owner["MenuHud"])
@@ -149,30 +201,33 @@ class CrouchMeleeMenuTests(unittest.TestCase):
             with self.subTest(opened=opened):
                 model, owner = self.model()
                 if opened:
-                    model.input("owner", {"Crouch", "Melee"})
+                    model.hold_menu_combo("owner")
                     model.input("owner", set())
+                model.input("owner", MENU_COMBO, now=10)
                 owner["alive"] = False
                 hud = owner["MenuHud"]
-                model.input("owner", {"Crouch", "Melee"})
+                model.input("owner", MENU_COMBO, now=10.25)
+                model.input("owner", MENU_COMBO, now=10.5)
                 self.assertEqual(owner["MenuOpen"], opened)
                 self.assertEqual(owner["MenuHud"], hud)
-                model.input("owner", set())
                 owner["alive"] = True
-                model.input("owner", {"Crouch", "Melee"})
+                model.input("owner", MENU_COMBO, now=11)
+                self.assertEqual(owner["MenuOpen"], opened)
+                model.input("owner", MENU_COMBO, now=11.5)
                 self.assertEqual(owner["MenuOpen"], not opened)
 
     def test_combo_is_owned_and_does_not_change_another_players_menu(self):
         model, owner = self.model()
         other = model.ready_player("other")
         saved = deepcopy(other)
-        model.input("owner", {"Crouch", "Melee"})
+        model.hold_menu_combo("owner")
         self.assertTrue(owner["MenuOpen"])
         self.assertEqual(other, saved)
 
     def punch_lobby(self, opened=False, protected=False):
         model, owner = self.model(CrouchTravelEnabled=True)
         if opened:
-            model.input("owner", {"Crouch", "Melee"})
+            model.hold_menu_combo("owner")
             model.input("owner", set())
         target = model.ready_player("target", position=Vector(2, 5, 9),
                                     UnkillableActive=protected,
@@ -185,13 +240,16 @@ class CrouchMeleeMenuTests(unittest.TestCase):
         for opened in (False, True):
             with self.subTest(opened=opened):
                 model, owner, target = self.punch_lobby(opened=opened)
-                model.input("owner", {"Crouch", "Melee"})
-                self.assertEqual(owner["MenuOpen"], not opened)
-                self.assertTrue(owner["MeleeConsumed"])
+                model.input("owner", MENU_COMBO, now=10)
+                self.assertEqual(owner["MenuOpen"], opened)
+                self.assertFalse(owner["MeleeConsumed"])
                 owner["melee"] = True
                 model.globals["ActivePlayer"] = "owner"
                 model.run("ProcessSuperPunch")
                 self.assertEqual(model.kills, [("target", "owner")])
+                model.input("owner", MENU_COMBO, now=10.5)
+                self.assertEqual(owner["MenuOpen"], not opened)
+                self.assertTrue(owner["MeleeConsumed"])
                 target["alive"] = True
                 model.run("ProcessSuperPunch")
                 model.fire("89i1", "owner", victim="target")
@@ -205,13 +263,15 @@ class CrouchMeleeMenuTests(unittest.TestCase):
                     model, owner, target = self.punch_lobby(opened=opened)
                     if queued_before:
                         self.assertTrue(model.fire("89i1", "owner", victim="target"))
-                    model.input("owner", {"Crouch", "Melee"})
+                    model.input("owner", MENU_COMBO, now=10)
                     if not queued_before:
                         self.assertTrue(model.fire("89i1", "owner", victim="target"))
-                    self.assertEqual(owner["MenuOpen"], not opened)
-                    self.assertTrue(owner["MeleeConsumed"])
+                    self.assertEqual(owner["MenuOpen"], opened)
                     model.run("ProcessGlobalEventQueue")
                     self.assertEqual(model.kills, [("target", "owner")])
+                    model.input("owner", MENU_COMBO, now=10.5)
+                    self.assertEqual(owner["MenuOpen"], not opened)
+                    self.assertTrue(owner["MeleeConsumed"])
                     target["alive"] = True
                     model.fire("89i1", "owner", victim="target")
                     model.run("ProcessGlobalEventQueue")
@@ -221,7 +281,7 @@ class CrouchMeleeMenuTests(unittest.TestCase):
         for native in (False, True):
             with self.subTest(native=native):
                 model, owner, target = self.punch_lobby(protected=True)
-                model.input("owner", {"Crouch", "Melee"})
+                model.input("owner", MENU_COMBO)
                 if native:
                     model.fire("89i1", "owner", victim="target")
                     model.run("ProcessGlobalEventQueue")

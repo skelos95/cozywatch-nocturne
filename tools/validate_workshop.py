@@ -844,6 +844,8 @@ def wait_role(rule: Rule, scheduler: Rule | None) -> str | None:
         return "leave ordering"
     if rule.name.startswith("01b -") and event_type(rule) == "Ongoing - Each Player":
         return "lifecycle stages"
+    if rule.name.startswith("05 -") and event_type(rule) == "Ongoing - Each Player":
+        return "menu hold"
     if "Abort When False" in body and "Button(Interact)" in body:
         return "camera hold"
     if "IsClassified" in body and "Is Dummy Bot" in body:
@@ -1127,7 +1129,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     checks.require(bool(hud_calls), "nessun HUD testuale trovato")
     for call in hud_calls:
         checks.require(len(call.args) >= 4, "Create HUD Text malformato")
-        if len(call.args) >= 2:
+        if len(call.args) >= 2 and tuple(call.args[4:6]) != ("Top", "2"):
             checks.equal(call.args[1].strip(), "Null", "Header Create HUD Text deve essere Null")
 
     server_title = next(
@@ -1176,19 +1178,25 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
             "Is Alive(Current Array Element)), And(Player Variable(Current Array Element, MenuOpen) == False, "
             "Player Variable(Current Array Element, LuckActive) == False)))"
         )
-        prompt = (
-            'Custom String("Hold {0} + press {1}: open Nocturne{2}", Input Binding String(Button(Crouch)), '
-            'Input Binding String(Button(Melee)), And(Player Variable(Local Player, CrouchTravelEnabled) == True, '
-            'Is Button Held(Local Player, Button(Crouch)) == False) ? '
-            r'Custom String("\n\nHold {0}: open Travel", Input Binding String(Button(Crouch))) : Custom String(""))'
+        header = (
+            'Custom String("Hold {0} + {1} for 0.5s: open Nocturne", Input Binding String(Button(Crouch)), '
+            'Input Binding String(Button(Melee)))'
         )
-        checks.equal(hint.args[1:3], ("Null", "Null"), "HUD apertura Nocturne: Header e Subheader vuoti")
+        travel = (
+            'And(Player Variable(Local Player, CrouchTravelEnabled) == True, '
+            'Is Button Held(Local Player, Button(Crouch)) == False) ? '
+            r'Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch))) : Custom String("")'
+        )
+        checks.equal(hint.args[3], "Null", "HUD apertura Nocturne: campo Text vuoto")
         checks.equal(clipboard_import.canonical_semantic_text(hint.args[0], "en-US"),
                      clipboard_import.canonical_semantic_text(audience, "en-US"),
                      "HUD apertura Nocturne: pubblico vivo e spawnato senza menu o Roulette attivi")
-        checks.equal(clipboard_import.canonical_semantic_text(hint.args[3], "en-US"),
-                     clipboard_import.canonical_semantic_text(prompt, "en-US"),
-                     "HUD apertura Nocturne: binding personali e riga Travel condizionale")
+        checks.equal(clipboard_import.canonical_semantic_text(hint.args[1], "en-US"),
+                     clipboard_import.canonical_semantic_text(header, "en-US"),
+                     "HUD apertura Nocturne: binding personali e durata nel titolo")
+        checks.equal(clipboard_import.canonical_semantic_text(hint.args[2], "en-US"),
+                     clipboard_import.canonical_semantic_text(travel, "en-US"),
+                     "HUD apertura Nocturne: sottotitolo Travel condizionale con una riga di spazio")
         checks.equal(hint.args[6:], ("Color(White)", "Color(White)", "Color(White)",
                                     "Visible To and String", "Visible Never"),
                      "HUD apertura Nocturne: colore bianco e rivalutazione di testo e pubblico")
@@ -1607,7 +1615,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 info_controls = (
                     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
                     ("+ {0} apply / {1} back / {2} reset*", ("Interact", "Reload", "Ultimate")),
-                    ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+                    ("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
                     ("Inspect: hold {0}; Nocturne closed; Travel off or player/bot/attach", ("Crouch",)),
                     ("Soundtrack: {0} + {1} / {2}: +10 / -10", ("Crouch", "Ability 1", "Ability 2")),
                     ("Travel ON, Nocturne closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
@@ -1673,7 +1681,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 if subroutine_target(rule) != "DrawTravelMenu":
                     close_controls = [custom for custom in iter_calls(subtitle, "Custom String")
                                       if len(custom.args) == 3
-                                      and parse_literal(custom.args[0]) == "Hold {0}: {1} close"
+                                      and parse_literal(custom.args[0]) == "Hold {0} + {1} for 0.5s: close"
                                       and custom.args[1].strip() == "Input Binding String(Button(Crouch))"
                                       and custom.args[2].strip() == "Input Binding String(Button(Melee))"]
                     checks.require(bool(close_controls),
@@ -1810,7 +1818,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                    and subtitle_branches[0] == "Event Player.MainMenuCursor == 0" else "")
         checks.require("0 - RITES / CONTROLS" in preview, "Main Info preview: title missing")
         preview_controls = (
-            ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+            ("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
             ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
             ("+ {0}: all controls", ("Interact",)),
             ("Nocturne closed: hold {0} to inspect hero/HP", ("Crouch",)),
@@ -3929,7 +3937,11 @@ def validate_input_contract(checks: Checks, rules: list[Rule]) -> None:
                          "Is Button Held(Event Player, Button(Melee)) == True;",
                          "Event Player.MeleeConsumed == False;", "Is Alive(Event Player) == True;"):
             checks.require(required in conditions, f"toggle menu: condizione mancante {required}")
-        checks.require("Wait(" not in mask_strings(menu_toggle.body), "toggle menu deve essere immediato")
+        actions = mask_strings(rule_block(menu_toggle, "actions") or "")
+        checks.require(
+            bool(re.match(r"\s*Wait\(0\.500, Abort When False\);\s*Event Player\.MeleeConsumed = True;", actions)),
+            "toggle menu: tenere entrambi i tasti per 0.500 s prima di consumare Melee",
+        )
         checks.require("Event Player.CrouchTravelActive == False;" not in conditions,
                        "toggle menu deve funzionare anche con Travel aperto")
 
@@ -4753,6 +4765,7 @@ def validate_scheduler(checks: Checks, source: str, rules: list[Rule], globals_:
         ("scheduler", ("0.050", "Ignore Condition")): 1,
         ("leave ordering", ("0.500", "Ignore Condition")): 1,
         ("bot classification", ("0.016", "Ignore Condition")): 1,
+        ("menu hold", ("0.500", "Abort When False")): 1,
         ("camera hold", ("0.500", "Abort When False")): 1,
         ("lifecycle stages", ("0.050", "Abort When False")): 2,
     })

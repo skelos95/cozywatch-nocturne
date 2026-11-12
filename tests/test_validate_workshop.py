@@ -772,8 +772,8 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         self.assert_rejected(self.replace_call_argument(absolute, 2, f"{condition} ? {info} : {changed}"),
                              "DrawMainMenu: subtitle binding missing: Crouch")
         for old, new, error in (
-            ('Custom String("Hold {0}: {1} close", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee)))',
-             'Custom String("Hold {0}: {1} close", Input Binding String(Button(Crouch)), Input Binding String(Button(Jump)))',
+            ('Custom String("Hold {0} + {1} for 0.5s: close", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee)))',
+             'Custom String("Hold {0} + {1} for 0.5s: close", Input Binding String(Button(Crouch)), Input Binding String(Button(Jump)))',
              "DrawMainMenu: subtitle close command"),
         ):
             with self.subTest(command=old):
@@ -890,17 +890,23 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.replace_call_argument(hint, 0, changed),
                                      "HUD apertura Nocturne: pubblico")
 
-    def test_nocturne_open_hint_requires_personal_bindings_and_spaced_travel_line(self) -> None:
+    def test_nocturne_open_hint_requires_personal_bindings_and_spaced_travel_subheader(self) -> None:
         hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
                     if call.args[4:6] == ("Top", "2"))
-        for token, replacement in (("Button(Melee)", "Button(Reload)"),
-                                   ("Local Player", "Host Player"), (r"\n\nHold", r"\nHold"),
-                                   ("Is Button Held(Local Player, Button(Crouch)) == False", "True")):
-            with self.subTest(text=token):
-                self.assertIn(token, hint.args[3])
-                changed = hint.args[3].replace(token, replacement, 1)
-                self.assert_rejected(self.replace_call_argument(hint, 3, changed),
-                                     "HUD apertura Nocturne: binding personali")
+        for index, token, replacement, reason in (
+            (1, "Button(Melee)", "Button(Reload)", "binding personali"),
+            (1, "0.5s", "0.1s", "binding personali"),
+            (2, "Local Player", "Host Player", "sottotitolo Travel"),
+            (2, r" \nHold", "Hold", "sottotitolo Travel"),
+            (2, "Is Button Held(Local Player, Button(Crouch)) == False", "True", "sottotitolo Travel"),
+        ):
+            with self.subTest(field=index, text=token):
+                self.assertIn(token, hint.args[index])
+                changed = hint.args[index].replace(token, replacement, 1)
+                self.assert_rejected(self.replace_call_argument(hint, index, changed),
+                                     f"HUD apertura Nocturne: {reason}")
+        self.assert_rejected(self.replace_call_argument(hint, 3, hint.args[2]),
+                             "HUD apertura Nocturne: campo Text vuoto")
         self.assert_rejected(self.replace_call_argument(hint, 9, "Visible To"),
                              "HUD apertura Nocturne: colore bianco e rivalutazione")
 
@@ -1114,7 +1120,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_info_controls_keep_the_menu_and_camera_bindings(self) -> None:
         info = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawInfoMenu")
-        old = 'Custom String("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
+        old = 'Custom String("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
         new = old.replace("Button(Melee)", "Button(Interact)", 1)
         mutated = self.replace_in_rule(info, old, new)
         self.assert_rejected(mutated, "Info")
@@ -1501,10 +1507,13 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.replace_in_rule(toggle, condition, ""),
                                      "toggle menu: condizione mancante")
 
-    def test_menu_toggle_cannot_regain_a_hold_delay_or_reject_active_travel(self) -> None:
+    def test_menu_toggle_requires_a_cancelable_half_second_hold_and_allows_active_travel(self) -> None:
         toggle = self.rule(lambda rule: rule.name.startswith("05 -"))
-        self.assert_rejected(self.inject_action(toggle, "Wait(0.500, Abort When False);"),
-                             "toggle menu deve essere immediato")
+        hold = "Wait(0.500, Abort When False);"
+        for replacement in ("", "Wait(0.100, Abort When False);", "Wait(0.500, Ignore Condition);"):
+            with self.subTest(replacement=replacement):
+                self.assert_rejected(self.replace_in_rule(toggle, hold, replacement),
+                                     "toggle menu: tenere entrambi i tasti per 0.500 s")
         mutated = self.replace_in_rule(toggle, "Event Player.LuckActive == False;",
                                        "Event Player.LuckActive == False;\n"
                                        "\t\tEvent Player.CrouchTravelActive == False;")
