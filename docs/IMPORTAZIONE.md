@@ -3,7 +3,7 @@
 ## Procedura
 
 1. Salva il preset della lobby e imposta la lingua testo di Overwatch su **English**.
-2. Scegli la revisione da importare: il [codice corrente](../workshop/ruang_irama.en-US.workshop) corrisponde alla versione **0.8.4**; la [release v0.8.3](https://github.com/skelos95/cozywatch-nocturne/releases/tag/v0.8.3) conserva il proprio pacchetto storico. Usa il commit per identificare esattamente una prova.
+2. Scegli la revisione da importare: il [codice corrente](../workshop/ruang_irama.en-US.workshop) corrisponde alla versione **0.8.5**; la [release v0.8.3](https://github.com/skelos95/cozywatch-nocturne/releases/tag/v0.8.3) conserva il proprio pacchetto storico. Usa il commit per identificare esattamente una prova.
 3. Apri il file `.workshop`, scegli **Raw** e copia tutto, da `variables` alla graffa finale, senza numeri di riga o testo della pagina GitHub.
 4. In **Custom Game → Settings → Workshop**, usa **Paste Rules**.
 5. Apri **Script Diagnostics** e annota **Element Count** e **Largest Rule**, insieme al commit importato.

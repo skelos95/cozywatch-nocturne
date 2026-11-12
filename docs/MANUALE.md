@@ -21,6 +21,8 @@ Comandi, menu e interazioni della revisione corrente. Per iniziare usa la [guida
 | Vivo, Multijump ON | Premi o tieni Jump in aria, anche con menu aperto | Salti aggiuntivi con la forza scelta |
 | Vivo, Death Punch ON | Melee, anche con Crouch tenuto e menu aperto | KO ravvicinato, anche sui compagni; Crouch + Melee alterna anche il menu; rispetta Unkillable |
 
+Da vivo, il promemoria in alto al centro mostra i binding per aprire Nocturne quando il menu è chiuso. Con Travel attivo aggiunge una riga separata per Crouch. Tenendo premuto Crouch scompare solo la riga Travel. Aprendo Nocturne scompare il promemoria.
+
 Ogni pressione dei comandi menu viene consumata una volta; rilascia Melee prima di aprire o chiudere di nuovo Nocturne e Interact prima di passare da menu a Camera. Melee resta un attacco anche con Crouch tenuto. Con Death Punch attivo, Crouch + Melee può alternare subito il menu ed eseguire il KO durante lo stesso attacco; restano necessari un bersaglio valido e le normali verifiche di protezione. Da morto il menu resta visibile ma non accetta comandi; con Multijump OFF Jump resta nativo da vivi.
 
 Rites / Controls mostra i binding personali e resta bianca. Le altre pagine mostrano i comandi contestuali sopra le opzioni. Il titolo `cozywatch.org [countdown]` e HOST sono in alto a destra; il roster è **SOULS & ECHOES** e il leader dei voti **CROWN OF ASH**.

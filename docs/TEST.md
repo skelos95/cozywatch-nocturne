@@ -1,6 +1,6 @@
 # Test nel gioco
 
-Questa è la matrice operativa per il codice **0.8.4**, tema **Nocturne**. Le release 0.8.2 e 0.8.3 conservano i pacchetti storici. Eseguire prima i [controlli automatici](VALIDAZIONE.md), poi associare ogni prova al commit importato.
+Questa è la matrice operativa per il codice **0.8.5**, tema **Nocturne**. Le release 0.8.2 e 0.8.3 conservano i pacchetti storici. Eseguire prima i [controlli automatici](VALIDAZIONE.md), poi associare ogni prova al commit importato.
 
 ## Riscontri disponibili
 
@@ -67,9 +67,9 @@ Per il confronto di stabilità impostare **60 minuti**; il riavvio allo zero è 
 
 Misurare baseline vuota, dopo gli ingressi, durante il picco e dopo cleanup completo. Ripetere la stessa configurazione quando si confrontano revisioni; una singola sessione riuscita non copre tutte le combinazioni.
 
-Con 12 umani, menu chiusi e nessun overlay temporaneo, il baseline previsto è 15 HUD: tre fissi più una riga Souls & Echoes per umano. I menu si aprono alla registrazione: chiuderli prima di misurare questo baseline. Le icone e gli In-World Text vanno confrontati separatamente.
+Con 12 umani, menu chiusi e nessun overlay temporaneo, il baseline previsto è 16 HUD: quattro fissi più una riga Souls & Echoes per umano. I menu si aprono alla registrazione: chiuderli prima di misurare questo baseline. Le icone e gli In-World Text vanno confrontati separatamente.
 
-## Revisione 0.8.4
+## Verifiche ereditate dalla 0.8.4
 
 - Nel principale non deve comparire Reload come ritorno; nei sottomenu deve restare disponibile.
 - Ghost / Fly e Multijump devono mostrare una sola riga con il cursore `>`, senza una voce vuota.
@@ -80,6 +80,7 @@ Con 12 umani, menu chiusi e nessun overlay temporaneo, il baseline previsto è 1
 
 ### Input, menu e HUD
 
+- Con due giocatori e binding diversi, tenere Travel OFF per uno e ON per l'altro. Chiudere Nocturne: entrambi devono vedere il proprio comando per aprirlo in alto al centro e soltanto chi ha Travel ON deve vedere la seconda riga, separata da una riga vuota. Tenendo Crouch, verificare che la riga Travel sparisca e quella Nocturne resti visibile fino all'apertura. Rilasciare Crouch e ripetere con menu aperto, dopo la morte e con Dark Roulette attiva.
 - Durata server: nelle impostazioni Workshop verificare il minimo di 30 minuti, il massimo di 60 e il default di 30; dopo l’importazione il countdown deve rispettare il valore scelto e riavviare la partita allo zero.
 - Nocturne: controllare `Enter the Nocturne.`, titolo `cozywatch.org [countdown]`, roster `SOULS & ECHOES` e leader `CROWN OF ASH`. Osservare almeno un ciclo RGB arcobaleno completo di 51 secondi su titolo, HOST, Luck e anello Multijump, con la stessa escursione cromatica del codice precedente a Nocturne. Provare mappe chiare e scure, con HUD e killfeed affollati: leggibilità e assenza di sovrapposizioni richiedono riscontro nel client. Quando manca una selezione Soundtrack, il fallback deve essere `silence before the storm`.
 - Percorrere tutte le 21 voci del principale inglese: Info / Controls 0, Name Color 1, Camera 2, Soundtrack 3, funzioni 4–16, Presence 17, Fates 18, Whispers 19 e Moonlit Aura 20. Per quelle con opzioni aprire il sottomenu, applicare, tornare e riaprire. Percorrere `19→20→0→1` e l'inverso. Navigare nella stessa pagina non deve creare altri HUD.
@@ -94,7 +95,7 @@ Con 12 umani, menu chiusi e nessun overlay temporaneo, il baseline previsto è 1
 - Durante lo spin di Luck il sottotitolo deve mostrare l'attesa, senza pubblicizzare spin/back/close bloccati; dopo la fine i comandi normali devono tornare.
 - Passare agli spettatori e tornare nella stessa squadra, anche conservando l'entità: preferenze ai default e principale su Info. Ripetere tornando nell'altra squadra e verificare che gli altri player conservino i propri menu e preferenze.
 - Da morto il menu resta visibile ma congelato; Jump funziona anche con menu, Camera o Luck precedentemente attivi.
-- Controllare binding dinamici, righe inglesi leggibili e un unico SOULS & ECHOES, con una riga vuota sotto il titolo prima del primo player e senza un HUD aggiuntivo. L'HUD Right 0 deve mostrare `cozywatch.org [countdown]` nel `Subheader` e HOST su una sola riga nel `Text`, con una riga vuota tra i due e una sotto HOST per il killfeed. Non devono restare il vecchio titolo Top 0 o lo spazio fisso Top 2: i menu centrali devono apparire più in alto, senza sovrapporsi al risultato Fates sottostante. Il margine sotto HOST era stato confermato dopo la PR #105; ripetere la verifica della nuova disposizione durante sequenze di uccisioni. Icona e nome devono seguire il cambio dell'host e il solo Text deve svuotarsi in sua assenza; titolo e timer restano visibili. Verificare il ciclo RGB arcobaleno di 51 secondi condiviso da entrambi i campi, Luck e anello Multijump. Niente `0` diagnostico, HUD separati del sito o vecchie voci per lingua/località.
+- Controllare binding dinamici, righe inglesi leggibili e un unico SOULS & ECHOES, con una riga vuota sotto il titolo prima del primo player e senza un HUD aggiuntivo. L'HUD Right 0 deve mostrare `cozywatch.org [countdown]` nel `Subheader` e HOST su una sola riga nel `Text`, con una riga vuota tra i due e una sotto HOST per il killfeed. Il promemoria Top 2 deve sparire all'apertura di Nocturne. Il menu e il risultato Fates devono restare leggibili e separati. Il margine sotto HOST era stato confermato dopo la PR #105; ripetere la verifica della nuova disposizione durante sequenze di uccisioni. Icona e nome devono seguire il cambio dell'host e il solo Text deve svuotarsi in sua assenza; titolo e timer restano visibili. Verificare il ciclo RGB arcobaleno di 51 secondi condiviso da entrambi i campi, Luck e anello Multijump. Niente `0` diagnostico, HUD separati del sito o vecchie voci per lingua/località.
 - Diagnostica OFF/ON: testo sempre bianco solo per l'host, anche con Name Color e menu di colori diversi. Provare ingressi, uscite e cambio dell'ultima riga; nessuno `0` o righe fantasma quando nascosta. Verificare la leggibilità del campo Text, senza nuovi handle.
 - Il profilo `งูแรร์` parte Charcoal / Poison 2 modificabili e Draconian fisso; il Soundtrack resta in sola lettura senza aggiungere un genere al catalogo globale.
 - Le icone devono seguire il proprietario, senza Light Shaft né nomi, entro 5 m tridimensionali con 1/6/12 umani. AI e dummy non ne creano. Camminare, saltare, volare e teletrasportarsi lontano: l’icona deve restare relativa al proprio proprietario e conservare il suo colore esatto anche quando cambia l’host; NONE non crea simboli. Provare mappe senza obiettivo disponibile e obiettivo all’origine: l’icona deve rimanere visibile.
