@@ -21,7 +21,7 @@ Comandi, menu e interazioni della revisione corrente. Per iniziare usa la [guida
 | Vivo, Multijump ON | Premi o tieni Jump in aria, anche con menu aperto | Salti aggiuntivi con la forza scelta |
 | Vivo, Death Punch ON | Melee, anche con Crouch tenuto e menu aperto | KO ravvicinato, anche sui compagni, rispettando Unkillable |
 
-Da vivo, il promemoria in alto al centro mostra i binding per aprire Nocturne e la durata della pressione quando il menu è chiuso. Con Travel attivo aggiunge il comando Crouch sotto una riga vuota. Tenendo premuto Crouch scompare la riga Travel. Aprendo Nocturne scompare il promemoria.
+Da vivo, il promemoria in alto al centro mostra i binding per aprire Nocturne e la durata della pressione quando il menu è chiuso. Con Travel attivo e Crouch rilasciato, il comando Travel appare sotto quello di Nocturne, separato da una riga vuota. Tenendo Crouch scompare la riga Travel. Aprendo Nocturne scompaiono entrambi i promemoria.
 
 Rilasciare Crouch o Melee prima di 0,5 s annulla il comando Nocturne. Dopo l'apertura o la chiusura, rilascia Melee prima di ripetere il comando. Rilascia Interact prima di passare dal menu alla Camera. Melee resta un attacco anche con Crouch tenuto. Con Death Punch attivo, l'impatto può mandare KO un bersaglio valido anche se rilasci Melee prima di aprire o chiudere Nocturne. Da morto il menu resta visibile ma non accetta comandi. Con Multijump OFF, Jump resta nativo da vivi.
 

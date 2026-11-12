@@ -2,7 +2,7 @@
 
 ## 0.8.5 — 2026-11-12
 
-- Aggiunto un promemoria in alto al centro con i binding per aprire Nocturne. Con Travel attivo compare il comando Crouch su una riga separata da una riga vuota. Tenere Crouch nasconde la sola indicazione Travel. Aprire Nocturne nasconde il promemoria.
+- Aggiunto un promemoria in alto al centro con i binding per aprire Nocturne e Travel. Tenere Crouch nasconde la sola indicazione Travel. Aprire Nocturne nasconde il promemoria.
 - Titoli dei menu più coerenti con Nocturne: Rites / Controls, Spectral Camera, Blood Debt / Revenge, Deathless, Soul Sigil / Icon e le altre etichette nella tabella del README. Guide e anteprime chiamano il menu Nocturne; gli indici e le funzioni delle pagine restano invariati.
 - Try Your Luck diventa Dark Roulette anche nei messaggi degli effetti. I testi della rotazione parlano della ruota, distinguendola dai dadi e presagi di Fates. Aggiornati i contratti testuali e rigenerati clipboard e riferimenti; stesso budget strutturale, nessun nuovo HUD.
 - Apertura/chiusura Nocturne immediata con Crouch tenuto + pressione Melee, senza l’attesa di 0,5 s. Una sola azione per pressione: rilasciare Melee per riarmare. La combo funziona anche da Travel, chiudendone l’interfaccia senza applicare la scelta né sganciare Attach. Melee e Death Punch funzionano anche con Crouch tenuto: se Death Punch è attivo, la stessa pressione può alternare il menu ed eseguire un KO valido, rispettando Unkillable e il limite di un contatto per attacco. Aggiornate guide e regressioni; la Camera conserva Interact tenuto 0,5 s.
@@ -10,7 +10,7 @@
 ### Correzioni alla 0.8.5
 
 - Per aprire o chiudere Nocturne, tieni premuti insieme Crouch e Melee per 0,5 s. Rilasciare uno dei due tasti prima della scadenza annulla il comando. Dopo l'apertura o la chiusura, occorre rilasciare Melee prima di ripeterlo. Travel rimane aperto fino al completamento della pressione. Death Punch continua a rispondere all'impatto melee.
-- Il promemoria Nocturne indica la pressione di 0,5 s nel campo `Header` dell'HUD. Il comando Travel usa il campo `Subheader` con una riga vuota contenente uno spazio e scompare quando si tiene Crouch.
+- I comandi in alto al centro usano due HUD. Nocturne indica la pressione di 0,5 s nel campo `Text` di Top 1. Travel compare nel campo `Subheader` di Top 2, preceduto da una riga vuota, solo per chi ha Travel attivo e Crouch rilasciato.
 
 ## 0.8.4 — 2026-11-02
 

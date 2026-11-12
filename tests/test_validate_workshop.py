@@ -880,7 +880,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_nocturne_open_hint_requires_the_closed_menu_audience(self) -> None:
         hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
-                    if call.args[4:6] == ("Top", "2"))
+                    if call.args[4:6] == ("Top", "1"))
         for token in ("Is Alive(Current Array Element)", "Has Spawned(Current Array Element)",
                       "Player Variable(Current Array Element, MenuOpen) == False",
                       "Player Variable(Current Array Element, LuckActive) == False"):
@@ -890,25 +890,48 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.replace_call_argument(hint, 0, changed),
                                      "HUD apertura Nocturne: pubblico")
 
-    def test_nocturne_open_hint_requires_personal_bindings_and_spaced_travel_subheader(self) -> None:
+    def test_nocturne_open_hint_keeps_personal_bindings_and_duration_in_text(self) -> None:
         hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
-                    if call.args[4:6] == ("Top", "2"))
-        for index, token, replacement, reason in (
-            (1, "Button(Melee)", "Button(Reload)", "binding personali"),
-            (1, "0.5s", "0.1s", "binding personali"),
-            (2, "Local Player", "Host Player", "sottotitolo Travel"),
-            (2, r" \nHold", "Hold", "sottotitolo Travel"),
-            (2, "Is Button Held(Local Player, Button(Crouch)) == False", "True", "sottotitolo Travel"),
-        ):
-            with self.subTest(field=index, text=token):
-                self.assertIn(token, hint.args[index])
-                changed = hint.args[index].replace(token, replacement, 1)
-                self.assert_rejected(self.replace_call_argument(hint, index, changed),
-                                     f"HUD apertura Nocturne: {reason}")
-        self.assert_rejected(self.replace_call_argument(hint, 3, hint.args[2]),
-                             "HUD apertura Nocturne: campo Text vuoto")
+                    if call.args[4:6] == ("Top", "1"))
+        for token, replacement in (("Button(Melee)", "Button(Reload)"), ("0.5s", "0.1s")):
+            with self.subTest(text=token):
+                self.assertIn(token, hint.args[3])
+                changed = hint.args[3].replace(token, replacement, 1)
+                self.assert_rejected(self.replace_call_argument(hint, 3, changed),
+                                     "HUD apertura Nocturne: binding personali")
+        self.assert_rejected(self.replace_call_argument(hint, 1, hint.args[3]),
+                             "Header Create HUD Text")
+        self.assert_rejected(self.replace_call_argument(hint, 2, hint.args[3]),
+                             "HUD apertura Nocturne: campo Subheader vuoto")
         self.assert_rejected(self.replace_call_argument(hint, 9, "Visible To"),
                              "HUD apertura Nocturne: colore bianco e rivalutazione")
+
+    def test_travel_open_hint_checks_each_player_for_enabled_travel_and_released_crouch(self) -> None:
+        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
+                    if call.args[4:6] == ("Top", "2"))
+        for token in ("Player Variable(Current Array Element, CrouchTravelEnabled) == True",
+                      "Is Button Held(Current Array Element, Button(Crouch)) == False"):
+            with self.subTest(guard=token):
+                self.assertIn(token, hint.args[0])
+                changed = hint.args[0].replace(token, "True", 1)
+                self.assert_rejected(self.replace_call_argument(hint, 0, changed),
+                                     "HUD apertura Travel: pubblico")
+
+    def test_travel_open_hint_keeps_the_gap_in_its_own_subheader(self) -> None:
+        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
+                    if call.args[4:6] == ("Top", "2"))
+        for token, replacement in ((r" \nHold", "Hold"), ("Button(Crouch)", "Button(Reload)")):
+            with self.subTest(text=token):
+                self.assertIn(token, hint.args[2])
+                changed = hint.args[2].replace(token, replacement, 1)
+                self.assert_rejected(self.replace_call_argument(hint, 2, changed),
+                                     "HUD apertura Travel: sottotitolo")
+        self.assert_rejected(self.replace_call_argument(hint, 1, hint.args[2]),
+                             "Header Create HUD Text")
+        self.assert_rejected(self.replace_call_argument(hint, 3, hint.args[2]),
+                             "HUD apertura Travel: campo Text vuoto")
+        self.assert_rejected(self.replace_call_argument(hint, 5, "1"),
+                             "HUD apertura Travel")
 
     def test_roster_hud_slots_are_exactly_zero_through_eleven(self) -> None:
         mutated = self.replace_once(
@@ -978,12 +1001,12 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         self.assert_rejected(mutated, "numero HUD globali: tre fissi e un roster")
 
     def test_diagnostic_fixed_hud_baseline_cannot_be_satisfied_by_a_comment(self) -> None:
-        token = "4 + Count Of(Filtered Array(Global.PlayerListHudIds"
+        token = "5 + Count Of(Filtered Array(Global.PlayerListHudIds"
         mutated = self.replace_once(token, "7 + Count Of(Filtered Array(Global.PlayerListHudIds")
         comment_anchor = '"This order deliberately runs from calm to chaotic. Keep the musical progression intact."'
         self.assertIn(comment_anchor, mutated)
         mutated = mutated.replace(comment_anchor, f'"{token}"\n\t\t{comment_anchor}', 1)
-        self.assert_rejected(mutated, "diagnostica HUD non include i quattro handle fissi")
+        self.assert_rejected(mutated, "diagnostica HUD non include i cinque handle fissi")
         call = self.left_roster_call()
         for handle in ("PlayerListHudIds", "MenuHudIds", "TemporaryEffectHudIds", "InspectionTextIds",
                        "TemporaryTravelTextIds", "TemporaryVisionTextIds"):
