@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Semantic static gate for Cozywatch Workshop 0.8.4.
+"""Semantic static gate for Cozywatch Workshop 0.8.5.
 
 The behavioral contracts validate the explicit logical input, while main also
 checks its English source parity and the real generated global runtime. No compiled
@@ -31,7 +31,7 @@ SOURCE = BEHAVIORAL_REFERENCE
 VERSION = ROOT / "VERSION"
 WORKFLOWS = ROOT / ".github" / "workflows"
 
-CURRENT_VERSION = "0.8.4"
+CURRENT_VERSION = "0.8.5"
 ALLOWED_WORKFLOWS = {"validate-workshop.yml"}
 MAX_DECLARATION_NAME_BYTES = 32
 CORE_DOCS = (
@@ -1163,7 +1163,35 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     checks.require(init_rule is not None, "regola inizializzazione griglia HUD assente")
     if init_rule:
         init_hud_calls = list(iter_calls(init_rule.body, "Create HUD Text"))
-        checks.equal(len(init_hud_calls), 3, "numero HUD fissi nella regola iniziale")
+        checks.equal(len(init_hud_calls), 4, "numero HUD fissi nella regola iniziale")
+
+    top_hints = [call for call in hud_calls if call.args[4:6] == ("Top", "2")]
+    checks.equal(len(top_hints), 1, "HUD apertura Nocturne: uno slot Top 2")
+    if top_hints:
+        hint = top_hints[0]
+        checks.require(init_rule is not None and init_rule.start <= hint.start < init_rule.end,
+                       "HUD apertura Nocturne: creazione nella regola iniziale")
+        audience = (
+            "Filtered Array(Global.HumanPlayers, And(And(Has Spawned(Current Array Element), "
+            "Is Alive(Current Array Element)), And(Player Variable(Current Array Element, MenuOpen) == False, "
+            "Player Variable(Current Array Element, LuckActive) == False)))"
+        )
+        prompt = (
+            'Custom String("Hold {0} + press {1}: open Nocturne{2}", Input Binding String(Button(Crouch)), '
+            'Input Binding String(Button(Melee)), And(Player Variable(Local Player, CrouchTravelEnabled) == True, '
+            'Is Button Held(Local Player, Button(Crouch)) == False) ? '
+            r'Custom String("\n\nHold {0}: open Travel", Input Binding String(Button(Crouch))) : Custom String(""))'
+        )
+        checks.equal(hint.args[1:3], ("Null", "Null"), "HUD apertura Nocturne: Header e Subheader vuoti")
+        checks.equal(clipboard_import.canonical_semantic_text(hint.args[0], "en-US"),
+                     clipboard_import.canonical_semantic_text(audience, "en-US"),
+                     "HUD apertura Nocturne: pubblico vivo e spawnato senza menu o Roulette attivi")
+        checks.equal(clipboard_import.canonical_semantic_text(hint.args[3], "en-US"),
+                     clipboard_import.canonical_semantic_text(prompt, "en-US"),
+                     "HUD apertura Nocturne: binding personali e riga Travel condizionale")
+        checks.equal(hint.args[6:], ("Color(White)", "Color(White)", "Color(White)",
+                                    "Visible To and String", "Visible Never"),
+                     "HUD apertura Nocturne: colore bianco e rivalutazione di testo e pubblico")
 
     global_hud_calls = [
         call for call in hud_calls
@@ -1304,8 +1332,8 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                        {("Left", "-2"), ("Left", "-1"), ("Right", "-16")},
                        "help HUD statici rimossi: usare Info / Controls")
 
-    checks.require("3 + Count Of(Filtered Array(Global.PlayerListHudIds" in mask_strings(source),
-                   "diagnostica HUD non include i tre handle fissi")
+    checks.require("4 + Count Of(Filtered Array(Global.PlayerListHudIds" in mask_strings(source),
+                   "diagnostica HUD non include i quattro handle fissi")
 
     roster_rule = next(
         (
@@ -1397,11 +1425,11 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                     if counts and len(counts.args) == 3:
                         checks.equal(
                             re.sub(r"\s+", "", counts.args[1]),
-                            "3+CountOf(FilteredArray(Global.PlayerListHudIds,CurrentArrayElement!=0))"
+                            "4+CountOf(FilteredArray(Global.PlayerListHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.MenuHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.TemporaryEffectHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.FateResultHudIds,CurrentArrayElement!=0))",
-                            "renderer HUD roster Left: conteggio HUD diagnostica deve includere tre fissi e tutti gli handle",
+                            "renderer HUD roster Left: conteggio HUD diagnostica deve includere quattro fissi e tutti gli handle",
                         )
                         checks.equal(
                             re.sub(r"\s+", "", counts.args[2]),
@@ -7056,8 +7084,13 @@ def validate_bot_isolation(checks: Checks, rules: list[Rule]) -> None:
                 allowed = {"Global.HumanPlayers", "Event Player"}
                 if subroutine_target(rule) in {"DrawNocturneMenu", "ShowFateResult"}:
                     allowed.add("Evaluate Once(Event Player)")
-                checks.require(call.args[0].strip() in allowed,
-                               f"Create HUD Text visibile a bot/dummy: {call.args[0].strip()}")
+                audience = call.args[0].strip()
+                is_filtered_open_hint = (
+                    call.args[4:6] == ("Top", "2")
+                    and audience.startswith("Filtered Array(Global.HumanPlayers, ")
+                )
+                checks.require(audience in allowed or is_filtered_open_hint,
+                               f"Create HUD Text visibile a bot/dummy: {audience}")
 
     bot_rule = next(
         (

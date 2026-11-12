@@ -27,6 +27,6 @@ Grammatica Workshop, identificatori, nomi delle regole, commenti e interfaccia s
 
 Gli identificatori delle regole della specifica restano stabili per compilatore e test. I titoli del clipboard vengono invece numerati consecutivamente a partire da 0, senza duplicati o suffissi alfabetici; questo non modifica le subroutine o il comportamento.
 
-La versione corrente è **0.8.4**; le release precedenti conservano i pacchetti storici. Generazione e test offline non sostituiscono la prova nel client sul commit esatto.
+La versione corrente è **0.8.5**; le release precedenti conservano i pacchetti storici. Generazione e test offline non sostituiscono la prova nel client sul commit esatto.
 
 [Architettura e contratti](../docs/PROGETTO.md) · [Manuale](../docs/MANUALE.md) · [Test nel gioco](../docs/TEST.md) · [Changelog](../CHANGELOG.md)

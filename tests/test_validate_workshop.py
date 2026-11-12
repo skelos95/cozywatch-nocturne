@@ -878,6 +878,32 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.inject_action(init, extra),
                                      "HUD globali Top 0/1/2 rimossi")
 
+    def test_nocturne_open_hint_requires_the_closed_menu_audience(self) -> None:
+        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
+                    if call.args[4:6] == ("Top", "2"))
+        for token in ("Is Alive(Current Array Element)", "Has Spawned(Current Array Element)",
+                      "Player Variable(Current Array Element, MenuOpen) == False",
+                      "Player Variable(Current Array Element, LuckActive) == False"):
+            with self.subTest(guard=token):
+                self.assertIn(token, hint.args[0])
+                changed = hint.args[0].replace(token, "True", 1)
+                self.assert_rejected(self.replace_call_argument(hint, 0, changed),
+                                     "HUD apertura Nocturne: pubblico")
+
+    def test_nocturne_open_hint_requires_personal_bindings_and_spaced_travel_line(self) -> None:
+        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
+                    if call.args[4:6] == ("Top", "2"))
+        for token, replacement in (("Button(Melee)", "Button(Reload)"),
+                                   ("Local Player", "Host Player"), (r"\n\nHold", r"\nHold"),
+                                   ("Is Button Held(Local Player, Button(Crouch)) == False", "True")):
+            with self.subTest(text=token):
+                self.assertIn(token, hint.args[3])
+                changed = hint.args[3].replace(token, replacement, 1)
+                self.assert_rejected(self.replace_call_argument(hint, 3, changed),
+                                     "HUD apertura Nocturne: binding personali")
+        self.assert_rejected(self.replace_call_argument(hint, 9, "Visible To"),
+                             "HUD apertura Nocturne: colore bianco e rivalutazione")
+
     def test_roster_hud_slots_are_exactly_zero_through_eleven(self) -> None:
         mutated = self.replace_once(
             "Global.AvailableHudSlots = Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);",
@@ -920,7 +946,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.replace_call_argument(host, 3, changed),
                                      "HUD Host: Text deve separarsi dal sottotitolo e lasciare spazio sotto")
 
-    def test_chill_grid_rejects_a_fourth_fixed_hud(self) -> None:
+    def test_chill_grid_rejects_a_fifth_fixed_hud(self) -> None:
         init = self.rule(
             lambda rule: validator.event_type(rule) == "Ongoing - Global"
             and "cozywatch.org" in rule.body
@@ -946,12 +972,12 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         self.assert_rejected(mutated, "numero HUD globali: tre fissi e un roster")
 
     def test_diagnostic_fixed_hud_baseline_cannot_be_satisfied_by_a_comment(self) -> None:
-        token = "3 + Count Of(Filtered Array(Global.PlayerListHudIds"
+        token = "4 + Count Of(Filtered Array(Global.PlayerListHudIds"
         mutated = self.replace_once(token, "7 + Count Of(Filtered Array(Global.PlayerListHudIds")
         comment_anchor = '"This order deliberately runs from calm to chaotic. Keep the musical progression intact."'
         self.assertIn(comment_anchor, mutated)
         mutated = mutated.replace(comment_anchor, f'"{token}"\n\t\t{comment_anchor}', 1)
-        self.assert_rejected(mutated, "diagnostica HUD non include i tre handle fissi")
+        self.assert_rejected(mutated, "diagnostica HUD non include i quattro handle fissi")
         call = self.left_roster_call()
         for handle in ("PlayerListHudIds", "MenuHudIds", "TemporaryEffectHudIds", "InspectionTextIds",
                        "TemporaryTravelTextIds", "TemporaryVisionTextIds"):

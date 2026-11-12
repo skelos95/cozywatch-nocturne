@@ -1,6 +1,6 @@
 # Cozywatch — Nocturne
 
-Modalità sociale per **Overwatch 2: Schermaglia, 6v6, fino a 12 giocatori contemporanei**. Personalizza il tuo stile, incontra altre anime e gioca con Camera, Travel, Ghost/Fly, Fates e Dark Roulette.
+Modalità sociale per **Overwatch: Schermaglia, 6v6, fino a 12 giocatori contemporanei**. Personalizza il tuo stile, incontra altre anime e gioca con Camera, Travel, Ghost/Fly, Fates e Dark Roulette.
 
 Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento lunare, malva, rose appassite, cappelle ed echi. I testi nel gioco sono brevi e in inglese; la documentazione è in italiano.
 
@@ -26,6 +26,8 @@ Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento l
 | Alterna Camera | Tieni Interact per 0,5 s con Crouch rilasciato |
 | Apri Travel & Attach | Tieni Crouch con Nocturne chiuso e Travel ON |
 | Resuscita | Jump da morto |
+
+Quando Nocturne è chiuso, un promemoria in alto al centro mostra i tasti per aprirlo. Con Travel attivo compare, una riga più sotto, il suo comando finché Crouch è rilasciato.
 
 I comandi usano i tuoi binding. Ogni pressione viene consumata una volta: rilascia Melee prima di alternare di nuovo Nocturne e Interact prima di passare dal menu alla Camera. Melee e Death Punch funzionano anche con Crouch tenuto: con Death Punch attivo la stessa pressione può alternare il menu ed eseguire il KO su un bersaglio valido. Da morto il menu rimane visibile ma non accetta comandi. [Comandi completi e contesti](docs/MANUALE.md#comandi).
 
@@ -63,7 +65,7 @@ Privacy blocca Camera, inspection, Teleport, Attach e Whispers verso di te e mos
 
 ## Stato attuale
 
-[VERSION](VERSION) è **0.8.4**. Include Presence, Fates, Whispers, Moonlit Aura, i filtri delle icone e la revisione di menu, testi e Travel. Le release 0.8.2 e 0.8.3 conservano i pacchetti storici. [Changelog](CHANGELOG.md).
+[VERSION](VERSION) è **0.8.5**. Aggiunge il promemoria dei comandi Nocturne e Travel e include l'apertura immediata con Crouch + Melee. [Changelog](CHANGELOG.md).
 
 I controlli automatici verificano struttura, regressioni e budget del runtime globale. Importazione, leggibilità, fisica e carico richiedono una prova nel client sul **commit esatto**: i [riscontri disponibili](docs/TEST.md#riscontri-disponibili) distinguono quanto già provato dalle modifiche successive. Conteggi e limiti sono raccolti in [Validazione](docs/VALIDAZIONE.md).
 
