@@ -387,7 +387,7 @@ class RuntimeMaintenanceTests(unittest.TestCase):
             self.assertNotIn("Disallow Button(Event Player, Button(Reload));", attach_rule)
             self.assertNotIn("Allow Button(Event Player, Button(Reload));", detach_rules)
             self.assertIn("{0} use / {1} detach | release {2}: close", source)
-            self.assertIn('Custom String("{0}+{1}: detach", Input Binding String(Button(Crouch)), Input Binding String(Button(Reload)))', source)
+            self.assertIn('Custom String("Attached. {0}+{1}: detach", Input Binding String(Button(Crouch)), Input Binding String(Button(Reload)))', source)
             self.assertIn("Input Binding String(Button(Crouch))", source)
             self.assertIn("Input Binding String(Button(Reload))", source)
             self.assertNotIn("CROUCH + RELOAD: DETACH", source)
