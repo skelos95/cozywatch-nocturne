@@ -2900,7 +2900,7 @@ rule("89a - Subroutine: Process fast player state")
 				Global.ActivePlayer.ForcedRevengeEndTime = 0;
 			Else If(And(Global.ActivePlayer.ForcedRevengeEndTime > 0, Total Time Elapsed >= Global.ActivePlayer.ForcedRevengeEndTime));
 				If(Global.ActivePlayer.RevengeDeathPending == True);
-					Small Message(Global.ActivePlayer.RevengeClaimant, Custom String("Revenge failed. Debt unchanged."));
+					Small Message(Evaluate Once(Global.ActivePlayer.RevengeClaimant), Custom String("Revenge failed. Debt unchanged."));
 					Set Player Variable(Global.ActivePlayer.RevengeClaimant, LockedRevengeTarget, Null);
 					Global.ActivePlayer.RevengeDeathPending = False;
 					Global.ActivePlayer.RevengeClaimant = Null;
@@ -3275,7 +3275,11 @@ rule("89d - Subroutine: Process the Try Your Luck state machine")
 					Set Move Speed(Global.ActivePlayer, 1000);
 					Start Accelerating(Global.ActivePlayer, Facing Direction Of(Evaluate Once(Global.ActivePlayer)), 50, 25, To World, Direction Rate and Max Speed);
 					Global.ActivePlayer.LuckEffectEndTime = Total Time Elapsed + 10;
-					Small Message(Global.ActivePlayer, Global.ActivePlayer.FlyModeActive == True ? Custom String("DARK ROULETTE: FLIGHT BOOST — 10s") : Custom String("DARK ROULETTE: AIM-STEERED ACCELERATION — 10s"));
+					If(Global.ActivePlayer.FlyModeActive == True);
+						Small Message(Evaluate Once(Global.ActivePlayer), Custom String("DARK ROULETTE: FLIGHT BOOST — 10s"));
+					Else;
+						Small Message(Evaluate Once(Global.ActivePlayer), Custom String("DARK ROULETTE: AIM-STEERED ACCELERATION — 10s"));
+					End;
 				Else If(Global.ActivePlayer.LuckEffect == 3);
 					Small Message(Global.ActivePlayer, Custom String("DARK ROULETTE: SKULL"));
 					Global.ActivePlayer.NextForcedRevengeTime = Total Time Elapsed;
