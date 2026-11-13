@@ -2736,7 +2736,7 @@ rule("19e - Crouch Travel: Interact applies the active page")
 				Event Player.AttachmentTargetHero = Hero Of(Event Player.TravelAttachmentTarget);
 				Event Player.TravelAttachmentActive = True;
 				Attach Players(Event Player, Event Player.TravelAttachmentTarget, Vector(0, Y Component Of(Eye Position(Event Player.TravelAttachmentTarget)) - Y Component Of(Position Of(Event Player.TravelAttachmentTarget)) + 0.750, 0));
-				Small Message(Evaluate Once(Event Player), Custom String("Attached: {0} | {1}", Evaluate Once(Event Player.TravelAttachmentTarget), Custom String("{0}+{1}: detach", Input Binding String(Button(Crouch)), Input Binding String(Button(Reload)))));
+				Small Message(Evaluate Once(Event Player), Custom String("Attached. {0}+{1}: detach", Input Binding String(Button(Crouch)), Input Binding String(Button(Reload))));
 			End;
 		Else;
 			If(Total Time Elapsed >= Event Player.NextSuicideTime);

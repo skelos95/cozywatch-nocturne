@@ -17,6 +17,7 @@
 - Ripristinata la versione con apertura e chiusura immediata di Nocturne tramite Crouch + Melee. Rimossi i due promemoria Melee e Travel in alto al centro.
 - Le conferme di Attach e Revenge acquisiscono i destinatari, i bersagli e il debito mostrato al momento dell'azione.
 - Le notifiche del boost di Dark Roulette e della scadenza di Revenge conservano testo e destinatario scelti quando vengono emesse.
+- La conferma di Attach mostra «Attached.» e i tasti per sganciarsi. Il nome del bersaglio compare nel menu Travel.
 
 ## 0.8.4 — 2026-11-02
 

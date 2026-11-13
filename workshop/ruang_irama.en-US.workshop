@@ -2644,7 +2644,7 @@ rule("66 - Crouch Travel: Interact applies the active page")
 		Global.TriggerPlayer.AttachmentTargetHero = Hero Of(Global.TriggerPlayer.TravelAttachmentTarget);
 		Global.TriggerPlayer.TravelAttachmentActive = True;
 		Attach Players(Evaluate Once(Global.TriggerPlayer), Player Variable(Evaluate Once(Global.TriggerPlayer), TravelAttachmentTarget), Vector(0, ((Y Component Of(Eye Position(Player Variable(Evaluate Once(Global.TriggerPlayer), TravelAttachmentTarget))) - Y Component Of(Position Of(Player Variable(Evaluate Once(Global.TriggerPlayer), TravelAttachmentTarget)))) + 0.750), 0));
-		Small Message(Evaluate Once(Global.TriggerPlayer), Custom String("Attached: {0} | {1}", Evaluate Once(Global.TriggerPlayer.TravelAttachmentTarget), Custom String("{0}+{1}: detach", Input Binding String(Button(Crouch)), Input Binding String(Button(Reload)))));
+		Small Message(Evaluate Once(Global.TriggerPlayer), Custom String("Attached. {0}+{1}: detach", Input Binding String(Button(Crouch)), Input Binding String(Button(Reload))));
 		End;
 		Else;
 		If((Total Time Elapsed >= Global.TriggerPlayer.NextSuicideTime));

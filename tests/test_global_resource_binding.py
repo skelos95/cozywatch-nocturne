@@ -362,15 +362,27 @@ class GlobalResourceBindingTests(unittest.TestCase):
                     (owner, f"SENT: GENTLE EMBRACE -> Soul {index}"),
                 ])
 
-    def test_attach_and_revenge_confirmations_capture_recipients_targets_and_debt(self):
+    def test_attach_confirmation_keeps_the_recipient_and_detach_bindings(self):
+        model = self.model(2)
+        owner = "owner0"
+        model.actor(owner)
+        rule = rule_for_logical_id(model.rules, "19e")
+        message, = (call for call in semantic.iter_calls(rule.body, "Small Message")
+                    if 'Custom String("Attached.' in call.args[1])
+        self.assertNotIn("TravelAttachmentTarget", message.args[1])
+        installed = tuple(model.install(argument) for argument in message.args)
+        for scratch in (owner, "owner1", None):
+            with self.subTest(scratch=scratch):
+                model.actor(scratch)
+                self.assertEqual(tuple(model.evaluate(argument) for argument in installed),
+                                 (owner, "Attached. Crouch+Reload: detach"))
+
+    def test_revenge_confirmations_capture_recipients_targets_and_debt(self):
         model = self.model(2)
         owner, target = "owner0", "target0"
         player = model.players[owner]
-        player.update(TravelAttachmentTarget=target, LockedRevengeTarget=target,
-                      RevengeDebts=[4, 2], RevengeIndex=1)
+        player.update(LockedRevengeTarget=target, RevengeDebts=[4, 2], RevengeIndex=1)
         confirmations = (
-            (rule_for_logical_id(model.rules, "19e"), owner, "Attached: {0}",
-             f"Attached: {target} | Crouch+Reload: detach"),
             (rule_for_logical_id(model.rules, "99e"), owner, "Revenge: {0}.", f"Revenge: {target}."),
             (rule_for_logical_id(model.rules, "17", "Subroutine"), target, "debt left: {1}",
              f"Revenge: {target} | debt left: 2."),
@@ -383,8 +395,7 @@ class GlobalResourceBindingTests(unittest.TestCase):
                            if marker in call.args[1])
             snapshots.append((tuple(model.install(argument) for argument in message.args), expected))
 
-        player.update(TravelAttachmentTarget=None, LockedRevengeTarget=None,
-                      RevengeDebts=[4, 1], RevengeIndex=0)
+        player.update(LockedRevengeTarget=None, RevengeDebts=[4, 1], RevengeIndex=0)
         for scratch in ("owner1", None):
             model.actor(scratch)
             model.globals["ActiveEvent"] = [None] * 9 + [scratch]
