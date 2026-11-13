@@ -1184,11 +1184,6 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         "And(Player Variable(Current Array Element, MenuOpen) == False, "
         "Player Variable(Current Array Element, LuckActive) == False))"
     )
-    nocturne_ready = (
-        f"And(Player Variable(Current Array Element, CrouchTravelActive) == False, And({closed_menu}, "
-        "And(Is Button Held(Current Array Element, Button(Crouch)), "
-        "Is Button Held(Current Array Element, Button(Melee))) == False))"
-    )
     travel_ready = (
         f"And({closed_menu}, And(Player Variable(Current Array Element, CrouchTravelEnabled) == True, "
         "Is Button Held(Current Array Element, Button(Crouch)) == False))"
@@ -1199,7 +1194,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     )
     travel_subheader = r'Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch)))'
     for order, name, condition, content_index, content, content_description in (
-        ("1", "Nocturne", nocturne_ready, 3, nocturne_text, "binding personali e durata"),
+        ("1", "Nocturne", closed_menu, 3, nocturne_text, "binding personali e durata"),
         ("2", "Travel", travel_ready, 2, travel_subheader, "sottotitolo con una riga di spazio"),
     ):
         label = f"HUD apertura {name}"
@@ -5299,13 +5294,15 @@ def validate_forced_death(checks: Checks, source: str, rules: list[Rule], player
                     0 <= position < kill_position,
                     f"Self Kill cooldown incompleto: {label} deve precedere Kill",
                 )
-        cooldown_message = (
-            'Small Message(Evaluate Once(Event Player), Custom String("{0}", Evaluate Once('
-            'Custom String("Self kill: wait {0}s.", '
-            'Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)))));'
+        cooldown_feedback = (
+            'Else If(Total Time Elapsed < Event Player.NextSuicideTime - 2); '
+            'Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait 3s.")); '
+            'Else If(Total Time Elapsed < Event Player.NextSuicideTime - 1); '
+            'Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait 2s.")); '
+            'Else; Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait 1s."));'
         )
-        checks.require(cooldown_message in self_kill.body,
-                       "Self Kill cooldown: destinatario e secondi residui devono essere acquisiti al tentativo")
+        checks.require(cooldown_feedback in " ".join(self_kill.body.split()),
+                       "Self Kill cooldown: Small Message deve scegliere un testo fisso tra 3, 2 e 1 secondi")
         checks.require(not wait_calls(self_kill.body) and action_loop_count(self_kill.body) == 0,
                        "Self Kill cooldown deve restare senza Wait/Loop")
 
