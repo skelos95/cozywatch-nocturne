@@ -13,6 +13,7 @@ import unittest
 from tools import validate_global_runtime as runtime
 from tools import validate_workshop as semantic
 from tests.test_global_controller_execution import GeneratedControllerEvaluator, RUNTIME
+from tests.test_nocturne_social import ARTIFACTS, NocturneEvaluator
 
 
 class RuleAborted(Exception):
@@ -324,6 +325,64 @@ class GlobalTravelStateTests(unittest.TestCase):
                 model.tick("viewer", "19a", "19e")
                 self.assertGreater(len(model.native_calls), len(before))
                 self.assertEqual(state[model.state_field][model.latch_index("19e")], 1)
+
+    def test_self_kill_hud_counts_down_on_the_same_handle_for_each_player(self):
+        ready = "CURRENT FORM | 3s COOLDOWN"
+        for path in ARTIFACTS:
+            with self.subTest(artifact=path.name):
+                model = NocturneEvaluator(path.read_text(encoding="utf-8"))
+                model.add("viewer", TravelCursor=4, NextSuicideTime=13)
+                model.add("other", TravelCursor=4, NextSuicideTime=0)
+                renderer = semantic.rule_by_subroutine(model.rules, "DrawTravelMenu")
+                create_hud = next(semantic.iter_calls(renderer.body, "Create HUD Text"))
+                handles = {}
+                for owner in ("viewer", "other"):
+                    model.event_player = owner
+                    model.globals.update(TriggerPlayer=owner, ActivePlayer=owner)
+                    model.execute(create_hud.raw + ";")
+                    handles[owner] = model.last_text
+                model.globals.update(TriggerPlayer=None, ActivePlayer=None)
+                for now, expected in ((10, "WAIT 3s"), (10.99, "WAIT 3s"),
+                                      (11, "WAIT 2s"), (12, "WAIT 1s"),
+                                      (12.99, "WAIT 1s"), (13, ready), (14, ready)):
+                    model.now = now
+                    for owner, status in (("viewer", expected), ("other", ready)):
+                        model.event_player = owner
+                        body = model.evaluate(model.hud_bodies[handles[owner]])
+                        self.assertTrue(body.endswith(f"5/5 | SELF KILL\n{status}"), body)
+                self.assertEqual(len(model.created_huds), 2)
+                self.assertEqual(model.destroyed_huds, [])
+
+    def test_rejected_self_kill_attempts_snapshot_the_remaining_time_and_owner(self):
+        for path in ARTIFACTS:
+            with self.subTest(artifact=path.name):
+                model = NocturneEvaluator(path.read_text(encoding="utf-8"))
+                viewer = model.add("viewer", TravelCursor=4, CrouchTravelActive=True,
+                                   NextSuicideTime=13)
+                model.add("other", TravelCursor=4, NextSuicideTime=70)
+                controller = (model.rule("19e") if "Ongoing - Each Player" in model.source else
+                              semantic.rule_by_subroutine(model.rules, "Controller19e"))
+                actions = semantic.rule_block(controller, "actions")
+                cooldown = next(call for call in semantic.iter_calls(actions, "If")
+                                if "NextSuicideTime" in call.args[0])
+                end = actions.index("End;", cooldown.end) + len("End;")
+                branch = actions[cooldown.start:end]
+                model.event_player = "viewer"
+                model.globals.update(TriggerPlayer="viewer", ActivePlayer="viewer")
+                for now, seconds in ((10.25, 3), (11.25, 2), (12.25, 1)):
+                    model.now = now
+                    model.execute(branch)
+                    self.assertEqual(model.messages[-1],
+                                     ("Small Message", "viewer", f"Self kill: wait {seconds}s."))
+                    self.assertEqual(viewer["NextSuicideTime"], 13)
+                self.assertEqual(len(model.message_arguments), 3)
+
+                model.now = 14
+                model.event_player = "other"
+                model.globals.update(TriggerPlayer="other", ActivePlayer="other")
+                for (_, audience, text), seconds in zip(model.message_arguments, (3, 2, 1)):
+                    self.assertEqual(model.evaluate(audience), "viewer")
+                    self.assertEqual(model.evaluate(text), f"Self kill: wait {seconds}s.")
 
 
 if __name__ == "__main__":

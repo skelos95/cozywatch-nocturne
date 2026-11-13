@@ -1088,6 +1088,18 @@ def validate_localization(checks: Checks, source: str, globals_: set[str]) -> No
                        f"numero argomenti/placeholder incoerente in Custom String: {literal!r}")
 
 
+def menu_hud_audience(renderer: str) -> str:
+    owner = "Evaluate Once(Event Player)" if renderer == "DrawNocturneMenu" else "Event Player"
+    visible = (
+        "And(Is Alive(Current Array Element), And(Player Variable(Current Array Element, MeleeConsumed) == False, "
+        "And(Is Button Held(Current Array Element, Button(Crouch)), "
+        "Is Button Held(Current Array Element, Button(Melee))))) == False"
+    )
+    if renderer == "DrawTravelMenu":
+        visible = f"And(Is Button Held(Current Array Element, Button(Crouch)), {visible})"
+    return f"Filtered Array(Array({owner}), {visible})"
+
+
 def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], players: set[str], subroutines: set[str]) -> None:
     routine_noise = (
         "Arcade Menu online.",
@@ -1129,7 +1141,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     checks.require(bool(hud_calls), "nessun HUD testuale trovato")
     for call in hud_calls:
         checks.require(len(call.args) >= 4, "Create HUD Text malformato")
-        if len(call.args) >= 2 and tuple(call.args[4:6]) != ("Top", "2"):
+        if len(call.args) >= 2:
             checks.equal(call.args[1].strip(), "Null", "Header Create HUD Text deve essere Null")
 
     server_title = next(
@@ -1165,41 +1177,51 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     checks.require(init_rule is not None, "regola inizializzazione griglia HUD assente")
     if init_rule:
         init_hud_calls = list(iter_calls(init_rule.body, "Create HUD Text"))
-        checks.equal(len(init_hud_calls), 4, "numero HUD fissi nella regola iniziale")
+        checks.equal(len(init_hud_calls), 5, "numero HUD fissi nella regola iniziale")
 
-    top_hints = [call for call in hud_calls if call.args[4:6] == ("Top", "2")]
-    checks.equal(len(top_hints), 1, "HUD apertura Nocturne: uno slot Top 2")
-    if top_hints:
-        hint = top_hints[0]
+    closed_menu = (
+        "And(And(Has Spawned(Current Array Element), Is Alive(Current Array Element)), "
+        "And(Player Variable(Current Array Element, MenuOpen) == False, "
+        "Player Variable(Current Array Element, LuckActive) == False))"
+    )
+    nocturne_ready = (
+        f"And(Player Variable(Current Array Element, CrouchTravelActive) == False, And({closed_menu}, "
+        "And(Is Button Held(Current Array Element, Button(Crouch)), "
+        "Is Button Held(Current Array Element, Button(Melee))) == False))"
+    )
+    travel_ready = (
+        f"And({closed_menu}, And(Player Variable(Current Array Element, CrouchTravelEnabled) == True, "
+        "Is Button Held(Current Array Element, Button(Crouch)) == False))"
+    )
+    nocturne_text = (
+        'Custom String("Hold {0} + {1} for 0.5s: open Nocturne", Input Binding String(Button(Crouch)), '
+        'Input Binding String(Button(Melee)))'
+    )
+    travel_subheader = r'Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch)))'
+    for order, name, condition, content_index, content, content_description in (
+        ("1", "Nocturne", nocturne_ready, 3, nocturne_text, "binding personali e durata"),
+        ("2", "Travel", travel_ready, 2, travel_subheader, "sottotitolo con una riga di spazio"),
+    ):
+        label = f"HUD apertura {name}"
+        hints = [call for call in hud_calls if call.args[4:6] == ("Top", order)]
+        checks.equal(len(hints), 1, f"{label}: uno slot Top {order}")
+        if not hints:
+            continue
+        hint = hints[0]
         checks.require(init_rule is not None and init_rule.start <= hint.start < init_rule.end,
-                       "HUD apertura Nocturne: creazione nella regola iniziale")
-        audience = (
-            "Filtered Array(Global.HumanPlayers, And(And(Has Spawned(Current Array Element), "
-            "Is Alive(Current Array Element)), And(Player Variable(Current Array Element, MenuOpen) == False, "
-            "Player Variable(Current Array Element, LuckActive) == False)))"
-        )
-        header = (
-            'Custom String("Hold {0} + {1} for 0.5s: open Nocturne", Input Binding String(Button(Crouch)), '
-            'Input Binding String(Button(Melee)))'
-        )
-        travel = (
-            'And(Player Variable(Local Player, CrouchTravelEnabled) == True, '
-            'Is Button Held(Local Player, Button(Crouch)) == False) ? '
-            r'Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch))) : Custom String("")'
-        )
-        checks.equal(hint.args[3], "Null", "HUD apertura Nocturne: campo Text vuoto")
+                       f"{label}: creazione nella regola iniziale")
+        blank_index, blank_field = (2, "Subheader") if content_index == 3 else (3, "Text")
+        checks.equal(hint.args[blank_index], "Null", f"{label}: campo {blank_field} vuoto")
+        audience = f"Filtered Array(Global.HumanPlayers, {condition})"
         checks.equal(clipboard_import.canonical_semantic_text(hint.args[0], "en-US"),
                      clipboard_import.canonical_semantic_text(audience, "en-US"),
-                     "HUD apertura Nocturne: pubblico vivo e spawnato senza menu o Roulette attivi")
-        checks.equal(clipboard_import.canonical_semantic_text(hint.args[1], "en-US"),
-                     clipboard_import.canonical_semantic_text(header, "en-US"),
-                     "HUD apertura Nocturne: binding personali e durata nel titolo")
-        checks.equal(clipboard_import.canonical_semantic_text(hint.args[2], "en-US"),
-                     clipboard_import.canonical_semantic_text(travel, "en-US"),
-                     "HUD apertura Nocturne: sottotitolo Travel condizionale con una riga di spazio")
+                     f"{label}: pubblico del promemoria")
+        checks.equal(clipboard_import.canonical_semantic_text(hint.args[content_index], "en-US"),
+                     clipboard_import.canonical_semantic_text(content, "en-US"),
+                     f"{label}: {content_description}")
         checks.equal(hint.args[6:], ("Color(White)", "Color(White)", "Color(White)",
                                     "Visible To and String", "Visible Never"),
-                     "HUD apertura Nocturne: colore bianco e rivalutazione di testo e pubblico")
+                     f"{label}: colore bianco e rivalutazione di testo e pubblico")
 
     global_hud_calls = [
         call for call in hud_calls
@@ -1340,8 +1362,8 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                        {("Left", "-2"), ("Left", "-1"), ("Right", "-16")},
                        "help HUD statici rimossi: usare Info / Controls")
 
-    checks.require("4 + Count Of(Filtered Array(Global.PlayerListHudIds" in mask_strings(source),
-                   "diagnostica HUD non include i quattro handle fissi")
+    checks.require("5 + Count Of(Filtered Array(Global.PlayerListHudIds" in mask_strings(source),
+                   "diagnostica HUD non include i cinque handle fissi")
 
     roster_rule = next(
         (
@@ -1433,11 +1455,11 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                     if counts and len(counts.args) == 3:
                         checks.equal(
                             re.sub(r"\s+", "", counts.args[1]),
-                            "4+CountOf(FilteredArray(Global.PlayerListHudIds,CurrentArrayElement!=0))"
+                            "5+CountOf(FilteredArray(Global.PlayerListHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.MenuHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.TemporaryEffectHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.FateResultHudIds,CurrentArrayElement!=0))",
-                            "renderer HUD roster Left: conteggio HUD diagnostica deve includere quattro fissi e tutti gli handle",
+                            "renderer HUD roster Left: conteggio HUD diagnostica deve includere cinque fissi e tutti gli handle",
                         )
                         checks.equal(
                             re.sub(r"\s+", "", counts.args[2]),
@@ -1494,6 +1516,13 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 for token in page_tokens:
                     checks.require(token in teleport_call.args[3],
                                    f"DrawTravelMenu: English page content missing: {token}")
+                self_kill_status = (
+                    'Total Time Elapsed < Event Player.NextSuicideTime ? Custom String("WAIT {0}s", '
+                    'Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)) '
+                    ': Custom String("CURRENT FORM | 3s COOLDOWN")'
+                )
+                checks.require(self_kill_status in teleport_call.args[3],
+                               "DrawTravelMenu: Self Kill deve mostrare il cooldown residuo personale")
                 for token in ("Hold {0}: {1} next / {2} prev",
                               "{0} use / {1} detach | release {2}: close"):
                     checks.require(token in teleport_call.args[2],
@@ -1594,8 +1623,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         calls = list(iter_calls(rule.body, "Create HUD Text"))
         checks.equal(len(calls), 1, f"{subroutine_target(rule)}: un solo Create HUD")
         if calls:
-            expected_owner = "Evaluate Once(Event Player)" if subroutine_target(rule) == "DrawNocturneMenu" else "Event Player"
-            checks.equal(calls[0].args[0].strip(), expected_owner,
+            checks.equal(calls[0].args[0].strip(), menu_hud_audience(subroutine_target(rule) or ""),
                          f"{subroutine_target(rule)}: HUD menu non deve essere nascosto/precaricato")
             checks.equal(calls[0].args[1].strip(), "Null",
                          f"{subroutine_target(rule)}: keep the Header empty")
@@ -5271,13 +5299,13 @@ def validate_forced_death(checks: Checks, source: str, rules: list[Rule], player
                     0 <= position < kill_position,
                     f"Self Kill cooldown incompleto: {label} deve precedere Kill",
                 )
-        checks.require('Self kill: wait {0}s.' in self_kill.body,
-                       "Self Kill cooldown: messaggio inglese dei secondi residui assente")
-        checks.require(
-            "Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)"
-            in self_kill.body,
-            "Self Kill cooldown non mostra i secondi residui arrotondati",
+        cooldown_message = (
+            'Small Message(Evaluate Once(Event Player), Custom String("{0}", Evaluate Once('
+            'Custom String("Self kill: wait {0}s.", '
+            'Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)))));'
         )
+        checks.require(cooldown_message in self_kill.body,
+                       "Self Kill cooldown: destinatario e secondi residui devono essere acquisiti al tentativo")
         checks.require(not wait_calls(self_kill.body) and action_loop_count(self_kill.body) == 0,
                        "Self Kill cooldown deve restare senza Wait/Loop")
 
@@ -7095,11 +7123,14 @@ def validate_bot_isolation(checks: Checks, rules: list[Rule]) -> None:
         for call in iter_calls(rule.body, "Create HUD Text"):
             if call.args:
                 allowed = {"Global.HumanPlayers", "Event Player"}
-                if subroutine_target(rule) in {"DrawNocturneMenu", "ShowFateResult"}:
+                renderer = subroutine_target(rule)
+                if renderer == "ShowFateResult":
                     allowed.add("Evaluate Once(Event Player)")
+                if renderer and "Event Player.MenuHud = Last Text ID;" in mask_strings(rule.body):
+                    allowed = {menu_hud_audience(renderer)}
                 audience = call.args[0].strip()
                 is_filtered_open_hint = (
-                    call.args[4:6] == ("Top", "2")
+                    call.args[4:6] in {("Top", "1"), ("Top", "2")}
                     and audience.startswith("Filtered Array(Global.HumanPlayers, ")
                 )
                 checks.require(audience in allowed or is_filtered_open_hint,
