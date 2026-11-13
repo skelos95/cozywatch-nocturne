@@ -5160,7 +5160,7 @@ rule("127 - Subroutine: Apply the personal Nocturne social page")
 		Global.TriggerPlayer.NocturneState[0] = Global.TriggerPlayer.NocturneState[1];
 		Else If((Global.TriggerPlayer.MenuPage == 18));
 		If((Total Time Elapsed < Global.TriggerPlayer.NocturneState[3]));
-		Small Message(Global.TriggerPlayer, Custom String("Let the raven rest: {0}s.", Round To Integer((Global.TriggerPlayer.NocturneState[3] - Total Time Elapsed), Up)));
+		Small Message(Evaluate Once(Global.TriggerPlayer), Custom String("Let the raven rest."));
 		Abort;
 		End;
 		Global.TriggerPlayer.NocturneState[3] = (Total Time Elapsed + 5);
@@ -5181,7 +5181,7 @@ rule("127 - Subroutine: Apply the personal Nocturne social page")
 		Global.TriggerPlayer.NocturneState[5] = (Global.TriggerPlayer.NocturneState[5] == False);
 		Else;
 		If((Total Time Elapsed < Global.TriggerPlayer.NocturneState[6]));
-		Small Message(Evaluate Once(Global.TriggerPlayer), Custom String("{0}", Evaluate Once(Custom String("Let the echo fade: {0}s.", Round To Integer((Global.TriggerPlayer.NocturneState[6] - Total Time Elapsed), Up)))));
+		Small Message(Evaluate Once(Global.TriggerPlayer), Custom String("Let the echo fade."));
 		Abort;
 		End;
 		Global.WhisperPlayer = Global.TriggerPlayer;

@@ -174,10 +174,10 @@ def validate_runtime(text: str) -> list[str]:
                 for call in semantic.iter_calls(actions, "Small Message"):
                     headers = "\n".join(branch.splitlines()[0] for branch in
                                         semantic.conditional_branches_containing(actions, call.start))
-                    if not re.search(r"Global\.TriggerPlayer\.MenuPage\s*==\s*19\b", headers):
+                    if not re.search(r"Global\.TriggerPlayer\.MenuPage\s*==\s*(?:18|19)\b", headers):
                         continue
                     if any(unfrozen_actors(argument) for argument in call.args):
-                        errors.append(f"runtime globale {rule.name}: destinatario o testo Whispers non congelato in Small Message")
+                        errors.append(f"runtime globale {rule.name}: destinatario o testo Fates/Whispers non congelato in Small Message")
             if semantic.subroutine_target(rule) == "UpdateSocialObjectiveIcons":
                 for call in semantic.iter_calls(actions, "Create Icon"):
                     audience = semantic.mask_strings(call.args[0])

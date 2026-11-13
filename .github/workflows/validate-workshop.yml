@@ -28,11 +28,13 @@ jobs:
 
       - name: Check diff whitespace
         shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git diff --check "origin/${{ github.base_ref }}...HEAD"
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            git diff --check "${{ github.event.before }}..${{ github.sha }}"
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            git diff --check "origin/${GITHUB_BASE_REF}...HEAD"
+          elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            git diff --check "${BEFORE_SHA}..${GITHUB_SHA}"
           else
             git diff --check HEAD^ HEAD
           fi

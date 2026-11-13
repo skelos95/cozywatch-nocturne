@@ -415,7 +415,7 @@ class GlobalResourceBindingTests(unittest.TestCase):
             body = rule.body[:message.start] + "Small Message(" + ", ".join(arguments) + ")" + rule.body[message.end:]
             mutated = self.normalized[:rule.start] + body + self.normalized[rule.end:]
             with self.subTest(argument=index):
-                self.assertTrue(any("Whispers non congelato in Small Message" in error
+                self.assertTrue(any("Fates/Whispers non congelato in Small Message" in error
                                     for error in runtime.validate_runtime(mutated)))
 
     def test_freezing_name_color_data_is_observable_after_owner_changes_color(self):
