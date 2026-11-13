@@ -5290,7 +5290,7 @@ rule("99t - Subroutine: Apply the personal Nocturne social page")
 			Event Player.NocturneState[0] = Event Player.NocturneState[1];
 		Else If(Event Player.MenuPage == 18);
 			If(Total Time Elapsed < Event Player.NocturneState[3]);
-				Small Message(Event Player, Custom String("Let the raven rest: {0}s.", Round To Integer(Event Player.NocturneState[3] - Total Time Elapsed, Up)));
+				Small Message(Evaluate Once(Event Player), Custom String("Let the raven rest."));
 				Abort;
 			End;
 			Event Player.NocturneState[3] = Total Time Elapsed + 5;
@@ -5311,7 +5311,7 @@ rule("99t - Subroutine: Apply the personal Nocturne social page")
 				Event Player.NocturneState[5] = Event Player.NocturneState[5] == False;
 			Else;
 				If(Total Time Elapsed < Event Player.NocturneState[6]);
-					Small Message(Evaluate Once(Event Player), Custom String("{0}", Evaluate Once(Custom String("Let the echo fade: {0}s.", Round To Integer(Event Player.NocturneState[6] - Total Time Elapsed, Up)))));
+					Small Message(Evaluate Once(Event Player), Custom String("Let the echo fade."));
 					Abort;
 				End;
 				Global.WhisperPlayer = Event Player;

@@ -6,6 +6,7 @@ Questa è la matrice operativa per il codice **0.8.5**, tema **Nocturne**. Le re
 
 | Data / revisione | Riscontro | Limite |
 |---|---|---|
+| 0.8.5, dopo la PR #127 | L'utente conferma il funzionamento dopo le correzioni al promemoria Melee e alla notifica Self Kill. | Riscontro qualitativo sulle due correzioni. SHA importato, build del client, durata, numero di giocatori e metriche native non indicati. |
 | 6 novembre, riscontro utente sul codice in uso | L'utente conferma di avere già eseguito i test e che «funziona tutto». | Riscontro precedente alla nuova revisione testuale dei menu; non identifica lo SHA importato. |
 | 3 novembre, riscontro utente sulla 0.8.4 | L’utente conferma: «funziona tutto». | Riscontro qualitativo generale; build client, durata, numero di player e metriche native non forniti. |
 | 1 novembre, Privacy delle icone / Unreleased | La richiesta aggiunge Privacy sull’icona fluttuante, un interruttore separato FLOATING e una riga vuota sotto Souls & Echoes; il simbolo nel roster resta pubblico. | Nuova funzione da verificare nel client sul commit importato; la matrice sotto distingue pubblico del mondo e del roster. |

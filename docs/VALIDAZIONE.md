@@ -42,7 +42,7 @@ Il preflight conta anche le espressioni con pesi ispirati al [compilatore OverPy
 
 Questa è una stima offline, non un compilatore Overwatch né un limite superiore garantito. Non modella tutti i default o l'overhead nativo. Il sorgente `2e1c4ff`, che il client ha mostrato a 36.381 elementi, produce 36.491 unità nella stima e viene rifiutato. Il preflight riporta i conteggi della revisione corrente e li confronta con i budget locali invariati. Il peso del testo UTF-8 viene riportato separatamente: non equivale alla dimensione compilata della regola. Element Count e Largest Rule del nuovo runtime vanno misurati nel client prima delle prove di carico.
 
-La revisione corrente usa **31.973 unità strutturali** nel clipboard, massimo 2.940 per regola e 342.744 byte UTF-8; il pacchetto pubblicato 0.8.3 usava 27.496 unità, massimo 2.605 e 299.838 byte. Il nuovo stato sociale occupa un solo array personale: il generato arriva a 128 variabili player, senza aggiungere un campo distinto per ogni scelta. Il toggle FLOATING usa lo slot 14 di `NocturneState`, inizialmente True; anteprima, conferma e scadenza Whispers usano gli slot 11–13; si aggiungono soltanto le due globali temporanee `Global.WhisperPlayer` e `Global.WhisperTarget` e la subroutine `RefreshWhisperTarget`, senza nuovi campi player, HUD o IWT. Il registro dedicato dei risultati Fates aggiunge cinque globali e due subroutine, senza nuovi campi player; gli HUD del registro sono inclusi nella diagnostica. I byte del testo sono misurati in UTF-8 con terminatori LF. Le soglie del progetto restano 32.000/5.000; queste misure non sono Element Count o Largest Rule del client.
+La revisione corrente usa **31.949 unità strutturali** nel clipboard, massimo 2.940 per regola e 342.542 byte UTF-8; il pacchetto pubblicato 0.8.3 usava 27.496 unità, massimo 2.605 e 299.838 byte. Il nuovo stato sociale occupa un solo array personale: il generato arriva a 128 variabili player, senza aggiungere un campo distinto per ogni scelta. Il toggle FLOATING usa lo slot 14 di `NocturneState`, inizialmente True; anteprima, conferma e scadenza Whispers usano gli slot 11–13; si aggiungono soltanto le due globali temporanee `Global.WhisperPlayer` e `Global.WhisperTarget` e la subroutine `RefreshWhisperTarget`, senza nuovi campi player, HUD o IWT. Il registro dedicato dei risultati Fates aggiunge cinque globali e due subroutine, senza nuovi campi player; gli HUD del registro sono inclusi nella diagnostica. I byte del testo sono misurati in UTF-8 con terminatori LF. Le soglie del progetto restano 32.000/5.000; queste misure non sono Element Count o Largest Rule del client.
 
 | Misura corrente | Specifica inglese | Runtime da importare |
 |---|---:|---:|
@@ -50,8 +50,8 @@ La revisione corrente usa **31.973 unità strutturali** nel clipboard, massimo 2
 | Variabili globali | 89 | 107 |
 | Variabili player | 126 | 128 |
 | Subroutine | 77 | 124 |
-| Byte di testo UTF-8 (LF) | 317.274 | 342.744 |
-| Unità strutturali stimate | 29.690 | 31.973 |
+| Byte di testo UTF-8 (LF) | 317.092 | 342.542 |
+| Unità strutturali stimate | 29.668 | 31.949 |
 | Massimo unità strutturali per regola | 3.676 | 2.940 |
 
 La regola del runtime più grande per testo usa 31.451 byte UTF-8; la regola con più unità strutturali ne usa 2.940. La specifica ha un massimo testuale di 38.094 byte e strutturale di 3.676 unità per regola. Dimensione del testo e peso delle espressioni vengono controllati separatamente.

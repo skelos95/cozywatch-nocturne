@@ -2429,10 +2429,16 @@ def validate_nocturne_social(checks: Checks, source: str, rules: list[Rule], pla
             "Abort If(Or(Has Spawned(Event Player) == False, Is Alive(Event Player) == False));",
         ):
             checks.require(packed(guard) in code, "Nocturne: handler riservato a umani registrati e vivi")
-        for field, seconds in ((3, 5), (6, 15)):
+        for field, seconds, message in ((3, 5, "Let the raven rest."), (6, 15, "Let the echo fade.")):
             checks.require(packed(f"Total Time Elapsed < Event Player.NocturneState[{field}]") in code
                            and packed(f"Event Player.NocturneState[{field}] = Total Time Elapsed + {seconds};") in code,
                            f"Nocturne: cooldown {seconds}s nel campo {field}")
+            feedback = (
+                f'If(Total Time Elapsed < Event Player.NocturneState[{field}]);'
+                f'Small Message(Evaluate Once(Event Player), Custom String("{message}"));Abort;End;'
+            )
+            checks.require(packed(feedback) in code,
+                           f"Nocturne: cooldown {seconds}s richiede un messaggio statico al mittente")
         recipient_calls = [call for call in iter_calls(apply.body, "Small Message")
                            if call.args[0] == "Evaluate Once(Event Player.InspectionTarget)"]
         checks.equal(len(recipient_calls), 1, "Nocturne: un solo messaggio privato al destinatario")

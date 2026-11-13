@@ -543,6 +543,29 @@ class NocturneSocialTests(unittest.TestCase):
                         model.apply("owner", 18, cursor)
                         self.assertEqual(len(model.draws), count)
 
+    def test_cooldown_feedback_does_not_change_after_the_scheduler_switches_players(self):
+        for artifact, model in self.models():
+            owner = model.add("owner", DisplayName="Owner", held={"Crouch"})
+            model.add("other")
+            model.aim = "other"
+            for page, cursor, field, duration, text in (
+                (18, 1, 3, 5, "Let the raven rest."),
+                (19, 1, 6, 15, "Let the echo fade."),
+            ):
+                with self.subTest(artifact=artifact, page=page):
+                    model.now = 35
+                    model.apply("owner", page, cursor)
+                    model.now += 0.25
+                    model.apply("owner", page, cursor)
+                    expected = ("Small Message", "owner", text)
+                    self.assertEqual(model.messages[-1], expected)
+                    self.assertEqual(owner["NocturneState"][field], 35 + duration)
+                    kind, recipient, body = model.message_arguments[-1]
+                    model.globals.update(TriggerPlayer="other", ActivePlayer="other")
+                    model.event_player = "other"
+                    model.now = 36
+                    self.assertEqual((kind, model.evaluate(recipient), model.evaluate(body)), expected)
+
     def test_fates_hud_is_a_private_snapshot_below_arcade_and_expires_after_three_seconds(self):
         for artifact, model in self.models():
             first = model.add("first")
@@ -999,6 +1022,11 @@ class NocturneMutationTests(unittest.TestCase):
             ("Abort If(Player Variable(Global.WhisperTarget, PlayerCycleActive) == True);", "", "consenso e target valido"),
             ("Event Player.NocturneState[3] = Total Time Elapsed + 5;", "Event Player.NocturneState[3] = Total Time Elapsed;", "cooldown 5s"),
             ("Event Player.NocturneState[6] = Total Time Elapsed + 15;", "Event Player.NocturneState[6] = Total Time Elapsed;", "cooldown 15s"),
+            ('Small Message(Evaluate Once(Event Player), Custom String("Let the raven rest."));',
+             'Small Message(Event Player, Custom String("Let the raven rest."));', "cooldown 5s richiede un messaggio statico"),
+            ('Custom String("Let the echo fade.")',
+             'Custom String("Let the echo fade: {0}s.", Event Player.NocturneState[6] - Total Time Elapsed)',
+             "cooldown 15s richiede un messaggio statico"),
         )
         self.assertEqual(self.errors(self.source), [])
         for old, new, expected in cases:

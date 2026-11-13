@@ -13,6 +13,7 @@
 - I comandi in alto al centro usano due HUD. Nocturne indica la pressione di 0,5 s nel campo `Text` di Top 1. Travel compare nel campo `Subheader` di Top 2, preceduto da una riga vuota, solo per chi ha Travel attivo e Crouch rilasciato.
 - Self Kill mostra sulla sua pagina i secondi residui del cooldown di 3 s. Per un tentativo anticipato, la notifica sceglie uno dei tre testi fissi da 3, 2 o 1 secondi al momento della pressione.
 - Durante la pressione di Crouch + Melee, il pannello precedente si nasconde subito. Rilasciando un tasto prima di 0,5 s, ricompare sulla stessa pagina. Il promemoria Melee resta visibile anche con Travel aperto e sparisce all'apertura di Nocturne.
+- Fates e Whispers mostrano una notifica breve durante il cooldown. I secondi residui continuano a scorrere nei rispettivi menu.
 
 ## 0.8.4 — 2026-11-02
 
