@@ -10,6 +10,7 @@ import unittest
 from tests.test_global_spectator_rejoin import ARTIFACT, SpectatorRuntimeEvaluator
 from tests.test_fly_motion import Vector
 from tools import validate_global_runtime as runtime
+from tools import validate_workshop as semantic
 
 
 MENU_COMBO = {"Crouch", "Melee"}
@@ -138,6 +139,90 @@ class CrouchMeleeMenuTests(unittest.TestCase):
                        if item[1:] == ("DestroyHUDText", old_hud))
         create = next(i for i, item in enumerate(events) if item[1] == "CreateHUDText")
         self.assertLess(destroy, create)
+
+    def test_pending_hold_hides_old_hud_until_cancel_or_commit(self):
+        model, owner = self.model(CrouchTravelEnabled=True)
+        model.ready_player("other", CrouchTravelEnabled=True)
+        audiences = {}
+        for name in ("DrawTravelMenu", "DrawMainMenu"):
+            rule = semantic.rule_by_subroutine(model.rules, name)
+            hud = next(semantic.iter_calls(rule.body, "Create HUD Text"))
+            self.assertIn("Evaluate Once(Global.TriggerPlayer)", hud.args[0])
+            # Substitute the value captured at creation. Reevaluate the filter
+            # with the scheduler pointing at another player.
+            audiences[name] = hud.args[0].replace(
+                "Evaluate Once(Global.TriggerPlayer)", '"owner"'
+            )
+
+        def audience(name):
+            model.globals["TriggerPlayer"] = "other"
+            return model.expression(audiences[name])
+
+        model.input("owner", {"Crouch"}, now=10)
+        travel_hud = owner["MenuHud"]
+        self.assertEqual(audience("DrawTravelMenu"), ["owner"])
+
+        model.input("owner", MENU_COMBO, now=10.1)
+        self.assertEqual(audience("DrawTravelMenu"), [])
+        self.assertEqual(owner["MenuHud"], travel_hud)
+        self.assertTrue(owner["CrouchTravelActive"])
+
+        model.input("owner", {"Crouch"}, now=10.2)
+        self.assertEqual(audience("DrawTravelMenu"), ["owner"])
+        self.assertEqual(owner["MenuHud"], travel_hud)
+
+        model.input("owner", MENU_COMBO, now=11)
+        model.input("owner", MENU_COMBO, now=11.5)
+        nocturne_hud = owner["MenuHud"]
+        self.assertNotEqual(nocturne_hud, travel_hud)
+        self.assertEqual(audience("DrawMainMenu"), ["owner"])
+
+        model.input("owner", {"Crouch"}, now=11.6)
+        model.input("owner", MENU_COMBO, now=11.7)
+        self.assertEqual(audience("DrawMainMenu"), [])
+        self.assertEqual(owner["MenuHud"], nocturne_hud)
+        self.assertTrue(owner["MenuOpen"])
+
+        model.input("owner", {"Crouch"}, now=11.8)
+        self.assertEqual(audience("DrawMainMenu"), ["owner"])
+        self.assertEqual(owner["MenuHud"], nocturne_hud)
+
+        model.input("owner", MENU_COMBO, now=12)
+        model.input("owner", MENU_COMBO, now=12.5)
+        self.assertIn(nocturne_hud, model.destroyed)
+        self.assertFalse(owner["CrouchTravelActive"])
+        model.input("owner", {"Crouch"}, now=12.55)
+        self.assertTrue(owner["CrouchTravelActive"])
+        self.assertEqual(audience("DrawTravelMenu"), ["owner"])
+        model.input("owner", set(), now=12.6)
+        self.assertEqual(audience("DrawTravelMenu"), [])
+
+    def test_bootstrap_reminders_hide_during_the_hold_per_viewer(self):
+        model, _ = self.model(CrouchTravelEnabled=True)
+        model.ready_player("other", CrouchTravelEnabled=True)
+        audiences = {}
+        for rule in model.rules:
+            for hud in semantic.iter_calls(rule.body, "Create HUD Text"):
+                if hud.args[4:6] in {("Top", "1"), ("Top", "2")}:
+                    audiences[hud.args[5]] = hud.args[0]
+
+        def reminder_viewers():
+            return tuple(model.expression(audiences[order]) for order in ("1", "2"))
+
+        self.assertEqual(reminder_viewers(), (["owner", "other"], ["owner", "other"]))
+        model.input("owner", MENU_COMBO, now=10)
+        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+
+        model.input("owner", {"Crouch"}, now=10.1)
+        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+        model.input("owner", MENU_COMBO, now=11)
+        model.input("owner", MENU_COMBO, now=11.5)
+        model.input("owner", {"Crouch"}, now=11.55)
+        model.input("owner", MENU_COMBO, now=12)
+        model.input("owner", MENU_COMBO, now=12.5)
+        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+        model.input("owner", set(), now=12.55)
+        self.assertEqual(reminder_viewers(), (["owner", "other"], ["owner", "other"]))
 
     def test_simultaneous_combo_has_priority_over_travel_opening(self):
         model, owner = self.model(CrouchTravelEnabled=True)

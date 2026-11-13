@@ -1088,6 +1088,18 @@ def validate_localization(checks: Checks, source: str, globals_: set[str]) -> No
                        f"numero argomenti/placeholder incoerente in Custom String: {literal!r}")
 
 
+def menu_hud_audience(renderer: str) -> str:
+    owner = "Evaluate Once(Event Player)" if renderer == "DrawNocturneMenu" else "Event Player"
+    visible = (
+        "And(Is Alive(Current Array Element), And(Player Variable(Current Array Element, MeleeConsumed) == False, "
+        "And(Is Button Held(Current Array Element, Button(Crouch)), "
+        "Is Button Held(Current Array Element, Button(Melee))))) == False"
+    )
+    if renderer == "DrawTravelMenu":
+        visible = f"And(Is Button Held(Current Array Element, Button(Crouch)), {visible})"
+    return f"Filtered Array(Array({owner}), {visible})"
+
+
 def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], players: set[str], subroutines: set[str]) -> None:
     routine_noise = (
         "Arcade Menu online.",
@@ -1172,6 +1184,11 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         "And(Player Variable(Current Array Element, MenuOpen) == False, "
         "Player Variable(Current Array Element, LuckActive) == False))"
     )
+    nocturne_ready = (
+        f"And(Player Variable(Current Array Element, CrouchTravelActive) == False, And({closed_menu}, "
+        "And(Is Button Held(Current Array Element, Button(Crouch)), "
+        "Is Button Held(Current Array Element, Button(Melee))) == False))"
+    )
     travel_ready = (
         f"And({closed_menu}, And(Player Variable(Current Array Element, CrouchTravelEnabled) == True, "
         "Is Button Held(Current Array Element, Button(Crouch)) == False))"
@@ -1182,7 +1199,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     )
     travel_subheader = r'Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch)))'
     for order, name, condition, content_index, content, content_description in (
-        ("1", "Nocturne", closed_menu, 3, nocturne_text, "binding personali e durata"),
+        ("1", "Nocturne", nocturne_ready, 3, nocturne_text, "binding personali e durata"),
         ("2", "Travel", travel_ready, 2, travel_subheader, "sottotitolo con una riga di spazio"),
     ):
         label = f"HUD apertura {name}"
@@ -1499,6 +1516,13 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 for token in page_tokens:
                     checks.require(token in teleport_call.args[3],
                                    f"DrawTravelMenu: English page content missing: {token}")
+                self_kill_status = (
+                    'Total Time Elapsed < Event Player.NextSuicideTime ? Custom String("WAIT {0}s", '
+                    'Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)) '
+                    ': Custom String("CURRENT FORM | 3s COOLDOWN")'
+                )
+                checks.require(self_kill_status in teleport_call.args[3],
+                               "DrawTravelMenu: Self Kill deve mostrare il cooldown residuo personale")
                 for token in ("Hold {0}: {1} next / {2} prev",
                               "{0} use / {1} detach | release {2}: close"):
                     checks.require(token in teleport_call.args[2],
@@ -1599,8 +1623,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         calls = list(iter_calls(rule.body, "Create HUD Text"))
         checks.equal(len(calls), 1, f"{subroutine_target(rule)}: un solo Create HUD")
         if calls:
-            expected_owner = "Evaluate Once(Event Player)" if subroutine_target(rule) == "DrawNocturneMenu" else "Event Player"
-            checks.equal(calls[0].args[0].strip(), expected_owner,
+            checks.equal(calls[0].args[0].strip(), menu_hud_audience(subroutine_target(rule) or ""),
                          f"{subroutine_target(rule)}: HUD menu non deve essere nascosto/precaricato")
             checks.equal(calls[0].args[1].strip(), "Null",
                          f"{subroutine_target(rule)}: keep the Header empty")
@@ -5276,13 +5299,13 @@ def validate_forced_death(checks: Checks, source: str, rules: list[Rule], player
                     0 <= position < kill_position,
                     f"Self Kill cooldown incompleto: {label} deve precedere Kill",
                 )
-        checks.require('Self kill: wait {0}s.' in self_kill.body,
-                       "Self Kill cooldown: messaggio inglese dei secondi residui assente")
-        checks.require(
-            "Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)"
-            in self_kill.body,
-            "Self Kill cooldown non mostra i secondi residui arrotondati",
+        cooldown_message = (
+            'Small Message(Evaluate Once(Event Player), Custom String("{0}", Evaluate Once('
+            'Custom String("Self kill: wait {0}s.", '
+            'Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)))));'
         )
+        checks.require(cooldown_message in self_kill.body,
+                       "Self Kill cooldown: destinatario e secondi residui devono essere acquisiti al tentativo")
         checks.require(not wait_calls(self_kill.body) and action_loop_count(self_kill.body) == 0,
                        "Self Kill cooldown deve restare senza Wait/Loop")
 
@@ -7100,8 +7123,11 @@ def validate_bot_isolation(checks: Checks, rules: list[Rule]) -> None:
         for call in iter_calls(rule.body, "Create HUD Text"):
             if call.args:
                 allowed = {"Global.HumanPlayers", "Event Player"}
-                if subroutine_target(rule) in {"DrawNocturneMenu", "ShowFateResult"}:
+                renderer = subroutine_target(rule)
+                if renderer == "ShowFateResult":
                     allowed.add("Evaluate Once(Event Player)")
+                if renderer and "Event Player.MenuHud = Last Text ID;" in mask_strings(rule.body):
+                    allowed = {menu_hud_audience(renderer)}
                 audience = call.args[0].strip()
                 is_filtered_open_hint = (
                     call.args[4:6] in {("Top", "1"), ("Top", "2")}

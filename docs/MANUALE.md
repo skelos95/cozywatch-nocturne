@@ -70,7 +70,9 @@ Il destinatario riceve il messaggio e il mittente una conferma privata; nel menu
 
 ## Travel e Camera
 
-Travel contiene cinque pagine: Teleport Spawn, Teleport Objective, Teleport Player/Bot, Attach e Self Elimination. Con Crouch tenuto, Primary/Secondary cambiano pagina e Interact esegue. Travel resta aperto mentre tieni premuti Crouch e Melee. Dopo 0,5 s, Nocturne si apre e chiude l'interfaccia Travel senza applicarne la scelta né interrompere Attach. I comandi richiedono un giocatore vivo e spawnato. La morte chiude Travel.
+Travel contiene cinque pagine: Teleport Spawn, Teleport Objective, Teleport Player/Bot, Attach e Self Elimination. Con Crouch tenuto, Primary/Secondary cambiano pagina e Interact esegue. Il promemoria Nocturne scompare quando apri Travel. Quando tieni premuti Crouch e Melee, il menu corrente si nasconde. Se interrompi il comando prima di 0,5 s, torna sulla stessa pagina. Se completi la pressione da Travel, si apre Nocturne e l'aggancio Attach resta attivo. I comandi richiedono un giocatore vivo e spawnato. La morte chiude Travel.
+
+Self Kill ha un cooldown personale di 3 secondi. Se riapri la pagina durante l'attesa, il testo mostra i secondi residui fino a quando il comando torna disponibile. Un tentativo anticipato indica il tempo residuo al momento della pressione.
 
 Un teletrasporto riuscito interrompe Attach e permette a Multijump di riprendere. Una destinazione rifiutata o un comando Spawn senza spostamento conserva invece l’aggancio. Con Nocturne chiuso, **Crouch + Reload** sgancia manualmente.
 

@@ -336,9 +336,12 @@ def persistent(text: str) -> str:
         # A private HUD is evaluated by its sole, frozen viewer. Its live text
         # and colour can therefore read Local Player without another capture
         # at every field reference. Public resources retain explicit owners.
-        if call.name == "Create HUD Text" and call.args[0].strip() == ACTOR:
+        if call.name == "Create HUD Text" and (
+            call.args[0].strip() == ACTOR
+            or call.args[0].startswith(f"Filtered Array(Array({ACTOR}), ")
+        ):
             values = list(call.args)
-            values[0] = f"Evaluate Once({ACTOR})"
+            values[0] = capture(values[0], ACTOR)
             for index in range(1, len(values)):
                 values[index] = re.sub(rf"\b{re.escape(ACTOR)}\.([A-Za-z][A-Za-z0-9_]*)", lambda m: f"Player Variable(Local Player, {m.group(1)})", values[index])
                 values[index] = re.sub(rf"\b{re.escape(ACTOR)}\b", "Local Player", values[index])

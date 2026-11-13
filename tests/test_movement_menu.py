@@ -234,13 +234,13 @@ class MovementMenuTests(unittest.TestCase):
             with self.subTest(source=source):
                 bootstrap = model.rule("00")
                 huds = list(validator.iter_calls(bootstrap.body, "Create HUD Text"))
-                self.assertEqual(len(huds), 4)
+                self.assertEqual(len(huds), 5)
                 title = next(call for call in huds if call.args[4:6] == ("Right", "0"))
                 self.assertEqual(title.args[2], 'Custom String("cozywatch.org [{0}]", Global.ServerTimeText)')
                 self.assertIn(r'Custom String("\n{0} {1} {2}\n "', title.args[3])
                 self.assertIn('Custom String("Host:")', title.args[3])
                 self.assertEqual(title.args[7:9], ("Global.RGB", "Global.RGB"))
-                self.assertEqual([call.args[5] for call in huds if call.args[4] == "Top"], ["2"])
+                self.assertEqual([call.args[5] for call in huds if call.args[4] == "Top"], ["1", "2"])
 
     def test_generated_hud_uses_live_viewer_values_after_global_dispatch_clears(self):
         root = SOURCES[0][0].parents[1]
@@ -252,7 +252,7 @@ class MovementMenuTests(unittest.TestCase):
                 self.assertIsNotNone(rule)
                 huds = list(validator.iter_calls(rule.body, "Create HUD Text"))
                 self.assertEqual(len(huds), 1)
-                self.assertEqual(huds[0].args[0], "Evaluate Once(Global.TriggerPlayer)")
+                self.assertTrue(huds[0].args[0].startswith("Filtered Array(Array(Evaluate Once(Global.TriggerPlayer)), "))
                 _, fields, _, _ = validator.declaration_entries(text)
                 context = CompactionContext([field.name for field in fields])
                 content = context.parse(huds[0].args[3])
