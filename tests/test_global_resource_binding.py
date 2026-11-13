@@ -37,6 +37,7 @@ class ResourceExpressions:
         self.values = {}
         self.trees = {}
         self.viewer = None
+        self.array_element = None
         self.objective = Vector(100, 2, 40)
 
     def actor(self, identity):
@@ -54,6 +55,8 @@ class ResourceExpressions:
             return name
         if name == "LocalPlayer":
             return self.viewer
+        if name == "CurrentArrayElement":
+            return self.array_element
         if name == "ObjectiveIndex":
             return 0
         if name.startswith("Global."):
@@ -61,7 +64,8 @@ class ResourceExpressions:
             value = self.globals[parts[1]]
             return self.players.get(value, {}).get(parts[2], 0) if len(parts) == 3 else value
         constants = {"True": True, "False": False, "Null": None,
-                     "EmptyArray": [], "White": "White", "Orange": "Orange"}
+                     "EmptyArray": [], "White": "White", "Orange": "Orange",
+                     "Crouch": "Crouch", "Melee": "Melee"}
         if name in constants:
             return constants[name]
         raise AssertionError(f"unsupported resource value: {name}")
@@ -69,6 +73,8 @@ class ResourceExpressions:
     def call(self, name, args):
         if name in ("EvaluateOnce", "UpdateEveryFrame"):
             return args[0]
+        if name == "Not":
+            return not args[0]
         if name == "PlayerVariable":
             return self.players.get(args[0], {}).get(args[1], 0)
         if name == "Vector":
@@ -89,6 +95,14 @@ class ResourceExpressions:
             return self.players.get(args[0], {}).get(key, 0)
         if name == "ArrayContains":
             return args[1] in args[0]
+        if name == "Array":
+            return args
+        if name == "IsAlive":
+            return self.players.get(args[0], {}).get("alive", True)
+        if name == "Button":
+            return args[0]
+        if name == "IsButtonHeld":
+            return args[1] in self.players.get(args[0], {}).get("held", set())
         if name == "CountOf":
             return len(args[0])
         if name == "At":
@@ -127,6 +141,15 @@ class ResourceExpressions:
             if kind == "call":
                 if node[1] in ("And", "Or"):
                     return (all if node[1] == "And" else any)(bool(visit(arg)) for arg in node[2])
+                if node[1] == "FilteredArray":
+                    audience = []
+                    previous = self.array_element
+                    for player in visit(node[2][0]):
+                        self.array_element = player
+                        if visit(node[2][1]):
+                            audience.append(player)
+                    self.array_element = previous
+                    return audience
                 return self.call(node[1], [visit(arg) for arg in node[2]])
             return operations[kind](visit(node[1]), visit(node[2]))
         return visit(self.trees[expression])
@@ -207,11 +230,14 @@ class GlobalResourceBindingTests(unittest.TestCase):
         for owner, value in (("owner0", (220, 10, 30, 255)),
                              ("owner1", (15, 160, 240, 255))):
             model.viewer = owner
-            self.assertEqual(model.evaluate(viewers[owner]), owner)
+            self.assertEqual(model.evaluate(viewers[owner]), [owner])
             self.assertEqual(model.evaluate(installed[owner]), value)
         model.actor("owner1")
         model.viewer = "owner0"
         model.players["owner0"]["MenuColor"] = Vector(100, 75, 20)
+        model.players["owner0"]["held"] = {"Crouch", "Melee"}
+        self.assertEqual(model.evaluate(viewers["owner0"]), [])
+        self.assertEqual(model.evaluate(viewers["owner1"]), ["owner1"])
         self.assertEqual(model.evaluate(installed["owner0"]), (100, 75, 20, 255))
 
     def test_twelve_cameras_follow_owned_targets_after_actor_changes(self):
