@@ -393,6 +393,51 @@ class GlobalResourceBindingTests(unittest.TestCase):
                     self.assertEqual(tuple(model.evaluate(argument) for argument in installed),
                                      (owner, expected))
 
+    def test_roulette_acceleration_messages_keep_the_selected_text_and_recipient(self):
+        model = self.model(2)
+        owner, next_player = "owner0", "owner1"
+        rule = rule_for_logical_id(model.rules, "89d")
+        for flying, label, branch_header in (
+            (True, "FLIGHT BOOST", "If(Global.ActivePlayer.FlyModeActive);"),
+            (False, "AIM-STEERED ACCELERATION", "Else;"),
+        ):
+            with self.subTest(flying=flying):
+                message, = (call for call in semantic.iter_calls(rule.body, "Small Message")
+                            if label in call.args[1])
+                branch = semantic.conditional_branches_containing(rule.body, message.start)[0]
+                self.assertEqual(branch.splitlines()[0].strip(), branch_header)
+                model.players[owner]["FlyModeActive"] = flying
+                model.players[next_player]["FlyModeActive"] = not flying
+                model.actor(owner)
+                installed = tuple(model.install(argument) for argument in message.args)
+                expected = (owner, f"DARK ROULETTE: {label} — 10s")
+                self.assertEqual(tuple(model.evaluate(argument) for argument in installed), expected)
+
+                model.players[owner]["FlyModeActive"] = not flying
+                for scratch in (next_player, None):
+                    model.actor(scratch)
+                    self.assertEqual(tuple(model.evaluate(argument) for argument in installed), expected)
+
+    def test_revenge_timeout_message_keeps_the_claimant_after_cleanup(self):
+        model = self.model(2)
+        owner, next_player, claimant = "owner0", "owner1", "target0"
+        model.players[owner]["RevengeClaimant"] = claimant
+        model.players[next_player]["RevengeClaimant"] = "target1"
+        rule = rule_for_logical_id(model.rules, "89a")
+        message, = (call for call in semantic.iter_calls(rule.body, "Small Message")
+                    if "Revenge failed. Debt unchanged." in call.args[1])
+        branch = semantic.conditional_branches_containing(rule.body, message.start)[0]
+        self.assertLess(branch.index(message.raw), branch.index("Global.ActivePlayer.RevengeClaimant = Null;"))
+
+        model.actor(owner)
+        installed = tuple(model.install(argument) for argument in message.args)
+        expected = (claimant, "Revenge failed. Debt unchanged.")
+        self.assertEqual(tuple(model.evaluate(argument) for argument in installed), expected)
+        model.players[owner]["RevengeClaimant"] = None
+        for scratch in (owner, next_player, None):
+            model.actor(scratch)
+            self.assertEqual(tuple(model.evaluate(argument) for argument in installed), expected)
+
     def test_unfrozen_whisper_receipt_reproduces_zero_after_actor_is_cleared(self):
         model = self.model(2)
         rule = semantic.rule_by_subroutine(model.rules, "ApplyNocturnePage")
