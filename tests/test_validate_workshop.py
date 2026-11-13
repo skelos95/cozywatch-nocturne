@@ -679,14 +679,13 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         mutated = self.replace_call_argument(absolute_call, 0, "Empty Array")
         self.assert_rejected(mutated, "nascosto/precaricato")
 
-    def test_menu_huds_require_a_filtered_private_recipient(self) -> None:
-        fates = self.rule(lambda rule: validator.subroutine_target(rule) == "ShowFateResult")
-        result, = validator.iter_calls(fates.body, "Create HUD Text")
-        self.assertEqual(result.args[0], "Evaluate Once(Event Player)")
-        call = next(hud for hud in validator.iter_calls(self.source, "Create HUD Text")
-                    if hud.args[0].startswith("Filtered Array(Array(Event Player), ")
-                    and "open Nocturne" not in hud.raw)
-        mutated = self.replace_call_argument(call, 0, "Evaluate Once(Event Player)")
+    def test_frozen_hud_recipient_is_allowed_only_for_nocturne_and_fates(self) -> None:
+        for routine in ("DrawNocturneMenu", "ShowFateResult"):
+            renderer = self.rule(lambda rule: validator.subroutine_target(rule) == routine)
+            call, = validator.iter_calls(renderer.body, "Create HUD Text")
+            self.assertEqual(call.args[0], "Evaluate Once(Event Player)")
+        renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawMainMenu")
+        mutated = self.replace_in_rule(renderer, "Create HUD Text(Event Player,", "Create HUD Text(Evaluate Once(Event Player),")
         self.assert_rejected(mutated, "Create HUD Text visibile a bot/dummy")
 
     def test_info_requires_all_content_in_subheader_with_empty_text(self) -> None:
@@ -773,8 +772,8 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         self.assert_rejected(self.replace_call_argument(absolute, 2, f"{condition} ? {info} : {changed}"),
                              "DrawMainMenu: subtitle binding missing: Crouch")
         for old, new, error in (
-            ('Custom String("Hold {0} + {1} for 0.5s: close", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee)))',
-             'Custom String("Hold {0} + {1} for 0.5s: close", Input Binding String(Button(Crouch)), Input Binding String(Button(Jump)))',
+            ('Custom String("Hold {0}: {1} close", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee)))',
+             'Custom String("Hold {0}: {1} close", Input Binding String(Button(Crouch)), Input Binding String(Button(Jump)))',
              "DrawMainMenu: subtitle close command"),
         ):
             with self.subTest(command=old):
@@ -880,60 +879,16 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.inject_action(init, extra),
                                      "HUD globali Top 0/1/2 rimossi")
 
-    def test_nocturne_open_hint_requires_the_closed_menu_audience(self) -> None:
-        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
-                    if call.args[4:6] == ("Top", "1"))
-        for token in ("Is Alive(Current Array Element)", "Has Spawned(Current Array Element)",
-                      "Player Variable(Current Array Element, MenuOpen) == False",
-                      "Player Variable(Current Array Element, LuckActive) == False"):
-            with self.subTest(guard=token):
-                self.assertIn(token, hint.args[0])
-                changed = hint.args[0].replace(token, "True", 1)
-                self.assert_rejected(self.replace_call_argument(hint, 0, changed),
-                                     "HUD apertura Nocturne: pubblico")
-
-    def test_nocturne_open_hint_keeps_personal_bindings_and_duration_in_text(self) -> None:
-        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
-                    if call.args[4:6] == ("Top", "1"))
-        for token, replacement in (("Button(Melee)", "Button(Reload)"), ("0.5s", "0.1s")):
-            with self.subTest(text=token):
-                self.assertIn(token, hint.args[3])
-                changed = hint.args[3].replace(token, replacement, 1)
-                self.assert_rejected(self.replace_call_argument(hint, 3, changed),
-                                     "HUD apertura Nocturne: binding personali")
-        self.assert_rejected(self.replace_call_argument(hint, 1, hint.args[3]),
-                             "Header Create HUD Text")
-        self.assert_rejected(self.replace_call_argument(hint, 2, hint.args[3]),
-                             "HUD apertura Nocturne: campo Subheader vuoto")
-        self.assert_rejected(self.replace_call_argument(hint, 9, "Visible To"),
-                             "HUD apertura Nocturne: colore bianco e rivalutazione")
-
-    def test_travel_open_hint_checks_each_player_for_enabled_travel_and_released_crouch(self) -> None:
-        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
-                    if call.args[4:6] == ("Top", "2"))
-        for token in ("Player Variable(Current Array Element, CrouchTravelEnabled) == True",
-                      "Is Button Held(Current Array Element, Button(Crouch)) == False"):
-            with self.subTest(guard=token):
-                self.assertIn(token, hint.args[0])
-                changed = hint.args[0].replace(token, "True", 1)
-                self.assert_rejected(self.replace_call_argument(hint, 0, changed),
-                                     "HUD apertura Travel: pubblico")
-
-    def test_travel_open_hint_keeps_the_gap_in_its_own_subheader(self) -> None:
-        hint = next(call for call in validator.iter_calls(self.source, "Create HUD Text")
-                    if call.args[4:6] == ("Top", "2"))
-        for token, replacement in ((r" \nHold", "Hold"), ("Button(Crouch)", "Button(Reload)")):
-            with self.subTest(text=token):
-                self.assertIn(token, hint.args[2])
-                changed = hint.args[2].replace(token, replacement, 1)
-                self.assert_rejected(self.replace_call_argument(hint, 2, changed),
-                                     "HUD apertura Travel: sottotitolo")
-        self.assert_rejected(self.replace_call_argument(hint, 1, hint.args[2]),
-                             "Header Create HUD Text")
-        self.assert_rejected(self.replace_call_argument(hint, 3, hint.args[2]),
-                             "HUD apertura Travel: campo Text vuoto")
-        self.assert_rejected(self.replace_call_argument(hint, 5, "1"),
-                             "HUD apertura Travel")
+    def test_filtered_opening_reminders_cannot_return_above_the_menu(self) -> None:
+        init = self.rule(lambda rule: rule.name.startswith("00 -"))
+        for order, prompt in ((1, "Open Nocturne"), (2, "Open Travel")):
+            with self.subTest(order=order):
+                extra = (
+                    'Create HUD Text(Filtered Array(Global.HumanPlayers, Is Alive(Current Array Element)), '
+                    f'Null, Null, Custom String("{prompt}"), Top, {order}, '
+                    'Color(White), Color(White), Color(White), Visible To and String, Visible Never);'
+                )
+                self.assert_rejected(self.inject_action(init, extra), "HUD globali Top 0/1/2 rimossi")
 
     def test_roster_hud_slots_are_exactly_zero_through_eleven(self) -> None:
         mutated = self.replace_once(
@@ -977,7 +932,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.replace_call_argument(host, 3, changed),
                                      "HUD Host: Text deve separarsi dal sottotitolo e lasciare spazio sotto")
 
-    def test_chill_grid_rejects_a_fifth_fixed_hud(self) -> None:
+    def test_chill_grid_rejects_a_fourth_fixed_hud(self) -> None:
         init = self.rule(
             lambda rule: validator.event_type(rule) == "Ongoing - Global"
             and "cozywatch.org" in rule.body
@@ -1003,12 +958,12 @@ class SemanticWorkshop081Tests(unittest.TestCase):
         self.assert_rejected(mutated, "numero HUD globali: tre fissi e un roster")
 
     def test_diagnostic_fixed_hud_baseline_cannot_be_satisfied_by_a_comment(self) -> None:
-        token = "5 + Count Of(Filtered Array(Global.PlayerListHudIds"
+        token = "3 + Count Of(Filtered Array(Global.PlayerListHudIds"
         mutated = self.replace_once(token, "7 + Count Of(Filtered Array(Global.PlayerListHudIds")
         comment_anchor = '"This order deliberately runs from calm to chaotic. Keep the musical progression intact."'
         self.assertIn(comment_anchor, mutated)
         mutated = mutated.replace(comment_anchor, f'"{token}"\n\t\t{comment_anchor}', 1)
-        self.assert_rejected(mutated, "diagnostica HUD non include i cinque handle fissi")
+        self.assert_rejected(mutated, "diagnostica HUD non include i tre handle fissi")
         call = self.left_roster_call()
         for handle in ("PlayerListHudIds", "MenuHudIds", "TemporaryEffectHudIds", "InspectionTextIds",
                        "TemporaryTravelTextIds", "TemporaryVisionTextIds"):
@@ -1144,7 +1099,7 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_info_controls_keep_the_menu_and_camera_bindings(self) -> None:
         info = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawInfoMenu")
-        old = 'Custom String("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
+        old = 'Custom String("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", Input Binding String(Button(Melee)), Input Binding String(Button(Interact)), Input Binding String(Button(Crouch)))'
         new = old.replace("Button(Melee)", "Button(Interact)", 1)
         mutated = self.replace_in_rule(info, old, new)
         self.assert_rejected(mutated, "Info")
@@ -1531,13 +1486,10 @@ class SemanticWorkshop081Tests(unittest.TestCase):
                 self.assert_rejected(self.replace_in_rule(toggle, condition, ""),
                                      "toggle menu: condizione mancante")
 
-    def test_menu_toggle_requires_a_cancelable_half_second_hold_and_allows_active_travel(self) -> None:
+    def test_menu_toggle_cannot_regain_a_hold_delay_or_reject_active_travel(self) -> None:
         toggle = self.rule(lambda rule: rule.name.startswith("05 -"))
-        hold = "Wait(0.500, Abort When False);"
-        for replacement in ("", "Wait(0.100, Abort When False);", "Wait(0.500, Ignore Condition);"):
-            with self.subTest(replacement=replacement):
-                self.assert_rejected(self.replace_in_rule(toggle, hold, replacement),
-                                     "toggle menu: tenere entrambi i tasti per 0.500 s")
+        self.assert_rejected(self.inject_action(toggle, "Wait(0.500, Abort When False);"),
+                             "toggle menu deve essere immediato")
         mutated = self.replace_in_rule(toggle, "Event Player.LuckActive == False;",
                                        "Event Player.LuckActive == False;\n"
                                        "\t\tEvent Player.CrouchTravelActive == False;")
