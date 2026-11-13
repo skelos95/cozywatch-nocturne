@@ -197,8 +197,8 @@ class CrouchMeleeMenuTests(unittest.TestCase):
         model.input("owner", set(), now=12.6)
         self.assertEqual(audience("DrawTravelMenu"), [])
 
-    def test_bootstrap_reminders_hide_during_the_hold_per_viewer(self):
-        model, _ = self.model(CrouchTravelEnabled=True)
+    def test_nocturne_reminder_stays_visible_until_the_menu_opens(self):
+        model, owner = self.model(CrouchTravelEnabled=True)
         model.ready_player("other", CrouchTravelEnabled=True)
         audiences = {}
         for rule in model.rules:
@@ -211,16 +211,27 @@ class CrouchMeleeMenuTests(unittest.TestCase):
 
         self.assertEqual(reminder_viewers(), (["owner", "other"], ["owner", "other"]))
         model.input("owner", MENU_COMBO, now=10)
-        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+        self.assertFalse(owner["CrouchTravelActive"])
+        self.assertEqual(reminder_viewers(), (["owner", "other"], ["other"]))
 
         model.input("owner", {"Crouch"}, now=10.1)
-        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+        self.assertTrue(owner["CrouchTravelActive"])
+        self.assertEqual(reminder_viewers(), (["owner", "other"], ["other"]))
         model.input("owner", MENU_COMBO, now=11)
+        model.input("owner", MENU_COMBO, now=11.499)
+        self.assertFalse(owner["MenuOpen"])
+        self.assertEqual(reminder_viewers(), (["owner", "other"], ["other"]))
+
         model.input("owner", MENU_COMBO, now=11.5)
-        model.input("owner", {"Crouch"}, now=11.55)
+        self.assertTrue(owner["MenuOpen"])
+        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+        model.input("owner", set(), now=11.55)
+        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+
         model.input("owner", MENU_COMBO, now=12)
         model.input("owner", MENU_COMBO, now=12.5)
-        self.assertEqual(reminder_viewers(), (["other"], ["other"]))
+        self.assertFalse(owner["MenuOpen"])
+        self.assertEqual(reminder_viewers(), (["owner", "other"], ["other"]))
         model.input("owner", set(), now=12.55)
         self.assertEqual(reminder_viewers(), (["owner", "other"], ["owner", "other"]))
 

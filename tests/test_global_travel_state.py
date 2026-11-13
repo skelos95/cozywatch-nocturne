@@ -353,12 +353,13 @@ class GlobalTravelStateTests(unittest.TestCase):
                 self.assertEqual(len(model.created_huds), 2)
                 self.assertEqual(model.destroyed_huds, [])
 
-    def test_rejected_self_kill_attempts_snapshot_the_remaining_time_and_owner(self):
+    def test_rejected_self_kill_uses_literal_seconds_at_each_cooldown_boundary(self):
+        attempts = ((35, 3), (35.99, 3), (36, 2), (36.99, 2), (37, 1), (37.99, 1))
         for path in ARTIFACTS:
             with self.subTest(artifact=path.name):
                 model = NocturneEvaluator(path.read_text(encoding="utf-8"))
                 viewer = model.add("viewer", TravelCursor=4, CrouchTravelActive=True,
-                                   NextSuicideTime=13)
+                                   NextSuicideTime=38)
                 model.add("other", TravelCursor=4, NextSuicideTime=70)
                 controller = (model.rule("19e") if "Ongoing - Each Player" in model.source else
                               semantic.rule_by_subroutine(model.rules, "Controller19e"))
@@ -369,20 +370,23 @@ class GlobalTravelStateTests(unittest.TestCase):
                 branch = actions[cooldown.start:end]
                 model.event_player = "viewer"
                 model.globals.update(TriggerPlayer="viewer", ActivePlayer="viewer")
-                for now, seconds in ((10.25, 3), (11.25, 2), (12.25, 1)):
+                for now, seconds in attempts:
                     model.now = now
                     model.execute(branch)
                     self.assertEqual(model.messages[-1],
                                      ("Small Message", "viewer", f"Self kill: wait {seconds}s."))
-                    self.assertEqual(viewer["NextSuicideTime"], 13)
-                self.assertEqual(len(model.message_arguments), 3)
+                    self.assertEqual(viewer["NextSuicideTime"], 38)
+                self.assertEqual(len(model.message_arguments), len(attempts))
 
-                model.now = 14
-                model.event_player = "other"
-                model.globals.update(TriggerPlayer="other", ActivePlayer="other")
-                for (_, audience, text), seconds in zip(model.message_arguments, (3, 2, 1)):
-                    self.assertEqual(model.evaluate(audience), "viewer")
-                    self.assertEqual(model.evaluate(text), f"Self kill: wait {seconds}s.")
+                for next_actor in (None, "other"):
+                    model.now = 60
+                    model.event_player = next_actor
+                    model.globals.update(TriggerPlayer=next_actor, ActivePlayer=next_actor)
+                    for (_, audience, text), (_, seconds) in zip(model.message_arguments, attempts):
+                        expected = f"Self kill: wait {seconds}s."
+                        self.assertEqual(text, f'Custom String("{expected}")')
+                        self.assertEqual(model.evaluate(audience), "viewer")
+                        self.assertEqual(model.evaluate(text), expected)
 
 
 if __name__ == "__main__":

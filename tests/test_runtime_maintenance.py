@@ -315,7 +315,11 @@ class RuntimeMaintenanceTests(unittest.TestCase):
             self.assertEqual(interact.count("Kill(Event Player, Null);"), 1)
             self.assertIn("If(Total Time Elapsed >= Event Player.NextSuicideTime);", interact)
             self.assertIn("Event Player.NextSuicideTime = Total Time Elapsed + 3;", interact)
-            self.assertIn("Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)", interact)
+            for seconds in (3, 2, 1):
+                self.assertIn(
+                    f'Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait {seconds}s."));',
+                    interact,
+                )
             self.assertIn("Clear Status(Event Player, Unkillable);", interact)
             self.assertIn("Set Damage Received(Event Player, 100);", interact)
             self.assertNotIn("Wait(", interact)

@@ -404,7 +404,7 @@ rule("00 - Global: Initialize 200 genres, from calm to chaos")
 		Create HUD Text(Global.HumanPlayers, Null, Global.VoteLeaderName != Custom String("") ? Custom String("\nCROWN OF ASH: {0}", Global.VoteLeaderName) : Custom String(""), Null, Left, 13, Color(White), Global.VoteLeaderColor, Color(White), Visible To String and Color, Visible Never);
 		Create HUD Text(Global.HumanPlayers, Null, Null, Custom String("SOULS & ECHOES\n "), Left, 0, Color(White), Custom Color(198, 185, 210, 255), Custom Color(202, 164, 180, 255), Visible To and String, Visible Never);
 		Create HUD Text(Global.HumanPlayers, Null, Custom String("cozywatch.org [{0}]", Global.ServerTimeText), Entity Exists(Host Player) ? Custom String("\n{0} {1} {2}\n ", Custom String("Host:"), Hero Icon String(Hero Of(Host Player)), And(Player Variable(Host Player, DisplayName) != Null, Player Variable(Host Player, DisplayName) != Custom String("")) ? Player Variable(Host Player, DisplayName) : Custom String("{0}", Host Player)) : Custom String(""), Right, 0, Color(White), Global.RGB, Global.RGB, Visible To String and Color, Visible Never);
-		Create HUD Text(Filtered Array(Global.HumanPlayers, And(Player Variable(Current Array Element, CrouchTravelActive) == False, And(And(And(Has Spawned(Current Array Element), Is Alive(Current Array Element)), And(Player Variable(Current Array Element, MenuOpen) == False, Player Variable(Current Array Element, LuckActive) == False)), And(Is Button Held(Current Array Element, Button(Crouch)), Is Button Held(Current Array Element, Button(Melee))) == False))), Null, Null, Custom String("Hold {0} + {1} for 0.5s: open Nocturne", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee))), Top, 1, Color(White), Color(White), Color(White), Visible To and String, Visible Never);
+		Create HUD Text(Filtered Array(Global.HumanPlayers, And(And(Has Spawned(Current Array Element), Is Alive(Current Array Element)), And(Player Variable(Current Array Element, MenuOpen) == False, Player Variable(Current Array Element, LuckActive) == False))), Null, Null, Custom String("Hold {0} + {1} for 0.5s: open Nocturne", Input Binding String(Button(Crouch)), Input Binding String(Button(Melee))), Top, 1, Color(White), Color(White), Color(White), Visible To and String, Visible Never);
 		Create HUD Text(Filtered Array(Global.HumanPlayers, And(And(And(Has Spawned(Current Array Element), Is Alive(Current Array Element)), And(Player Variable(Current Array Element, MenuOpen) == False, Player Variable(Current Array Element, LuckActive) == False)), And(Player Variable(Current Array Element, CrouchTravelEnabled) == True, Is Button Held(Current Array Element, Button(Crouch)) == False))), Null, Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch))), Null, Top, 2, Color(White), Color(White), Color(White), Visible To and String, Visible Never);
 		Global.ObjectiveIconOwners = Array(Null, Null, Null, Null, Null, Null, Null, Null, Null, Null, Null, Null);
 		Global.ObjectiveIconIds = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -2749,8 +2749,12 @@ rule("19e - Crouch Travel: Interact applies the active page")
 				Clear Status(Event Player, Unkillable);
 				Set Damage Received(Event Player, 100);
 				Kill(Event Player, Null);
+			Else If(Total Time Elapsed < Event Player.NextSuicideTime - 2);
+				Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait 3s."));
+			Else If(Total Time Elapsed < Event Player.NextSuicideTime - 1);
+				Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait 2s."));
 			Else;
-				Small Message(Evaluate Once(Event Player), Custom String("{0}", Evaluate Once(Custom String("Self kill: wait {0}s.", Round To Integer(Event Player.NextSuicideTime - Total Time Elapsed, Up)))));
+				Small Message(Evaluate Once(Event Player), Custom String("Self kill: wait 1s."));
 			End;
 		End;
 		Event Player.LockedTravelType = -1;
