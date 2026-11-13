@@ -866,7 +866,8 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_revenge_no_target_branch_keeps_crouch_help_in_the_subtitle(self) -> None:
         renderer = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawRevengeMenu")
-        mutated = self.replace_in_rule(renderer, "Button(Crouch)", "Button(Melee)")
+        mutated = self.replace_in_rule(renderer, "Input Binding String(Button(Crouch))",
+                                       "Input Binding String(Button(Melee))")
         self.assert_rejected(mutated, "DrawRevengeMenu: navigation must bind Crouch")
 
     def test_center_above_menus_stays_free_of_global_spacers(self) -> None:
@@ -1137,9 +1138,8 @@ class SemanticWorkshop081Tests(unittest.TestCase):
 
     def test_info_controls_keep_the_crouch_binding(self) -> None:
         info = self.rule(lambda rule: validator.subroutine_target(rule) == "DrawInfoMenu")
-        changed = info.body.replace("Button(Crouch)", "Button(Melee)", 1)
-        self.assertNotEqual(changed, info.body)
-        mutated = self.source[:info.start] + changed + self.source[info.end:]
+        mutated = self.replace_in_rule(info, "Input Binding String(Button(Crouch))",
+                                       "Input Binding String(Button(Melee))")
         self.assert_rejected(mutated, "Info")
 
     def test_info_controls_keep_the_menu_and_camera_bindings(self) -> None:
