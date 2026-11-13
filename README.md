@@ -18,7 +18,7 @@ Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento l
 
 | Azione | Comando |
 |---|---|
-| Apri/chiudi Nocturne | Tieni premuti insieme Crouch e Melee per 0,5 s da vivo, anche da Travel |
+| Apri/chiudi Nocturne | Tieni Crouch e premi Melee da vivo, anche da Travel |
 | Scorri un elenco | Crouch + Primary / Secondary |
 | Apri, applica o alterna ON/OFF | Crouch + Interact |
 | Torna al principale da un sottomenu | Crouch + Reload |
@@ -27,9 +27,7 @@ Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento l
 | Apri Travel & Attach | Tieni Crouch con Nocturne chiuso e Travel ON |
 | Resuscita | Jump da morto |
 
-Quando Nocturne è chiuso, il promemoria in alto al centro mostra i tasti per aprirlo e la durata della pressione. Con Travel attivo e Crouch rilasciato, un secondo promemoria mostra il comando Travel sotto il primo, con una riga vuota di separazione.
-
-I comandi usano i tuoi binding. Se rilasci Crouch o Melee prima di 0,5 s, annulli il comando Nocturne. Dopo l'apertura o la chiusura, rilascia Melee prima di ripetere il comando. Rilascia Interact prima di passare dal menu alla Camera. Melee e Death Punch funzionano anche con Crouch tenuto. Con Death Punch attivo, l'impatto può mandare KO un bersaglio valido indipendentemente dal comando Nocturne. Da morto il menu rimane visibile ma non accetta comandi. [Comandi completi e contesti](docs/MANUALE.md#comandi).
+I comandi usano i tuoi binding. Dopo l'apertura o la chiusura, rilascia Melee prima di ripetere il comando. Rilascia Interact prima di passare dal menu alla Camera. Melee e Death Punch funzionano anche con Crouch tenuto. Con Death Punch attivo, l'impatto può mandare KO un bersaglio valido indipendentemente dal comando Nocturne. Da morto il menu rimane visibile ma non accetta comandi. [Comandi completi e contesti](docs/MANUALE.md#comandi).
 
 ## Menu personali
 
@@ -65,7 +63,7 @@ Privacy blocca Camera, inspection, Teleport, Attach e Whispers verso di te e mos
 
 ## Stato attuale
 
-[VERSION](VERSION) è **0.8.5**. Include il promemoria dei comandi Nocturne e Travel e la pressione di 0,5 s di Crouch + Melee per aprire o chiudere Nocturne. [Changelog](CHANGELOG.md).
+[VERSION](VERSION) è **0.8.5**. Crouch + Melee apre o chiude Nocturne alla pressione. La guida Rites / Controls riepiloga i comandi. [Changelog](CHANGELOG.md).
 
 I controlli automatici verificano struttura, regressioni e budget del runtime globale. Importazione, leggibilità, fisica e carico richiedono una prova nel client sul **commit esatto**: i [riscontri disponibili](docs/TEST.md#riscontri-disponibili) distinguono quanto già provato dalle modifiche successive. Conteggi e limiti sono raccolti in [Validazione](docs/VALIDAZIONE.md).
 

@@ -844,8 +844,6 @@ def wait_role(rule: Rule, scheduler: Rule | None) -> str | None:
         return "leave ordering"
     if rule.name.startswith("01b -") and event_type(rule) == "Ongoing - Each Player":
         return "lifecycle stages"
-    if rule.name.startswith("05 -") and event_type(rule) == "Ongoing - Each Player":
-        return "menu hold"
     if "Abort When False" in body and "Button(Interact)" in body:
         return "camera hold"
     if "IsClassified" in body and "Is Dummy Bot" in body:
@@ -1088,18 +1086,6 @@ def validate_localization(checks: Checks, source: str, globals_: set[str]) -> No
                        f"numero argomenti/placeholder incoerente in Custom String: {literal!r}")
 
 
-def menu_hud_audience(renderer: str) -> str:
-    owner = "Evaluate Once(Event Player)" if renderer == "DrawNocturneMenu" else "Event Player"
-    visible = (
-        "And(Is Alive(Current Array Element), And(Player Variable(Current Array Element, MeleeConsumed) == False, "
-        "And(Is Button Held(Current Array Element, Button(Crouch)), "
-        "Is Button Held(Current Array Element, Button(Melee))))) == False"
-    )
-    if renderer == "DrawTravelMenu":
-        visible = f"And(Is Button Held(Current Array Element, Button(Crouch)), {visible})"
-    return f"Filtered Array(Array({owner}), {visible})"
-
-
 def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], players: set[str], subroutines: set[str]) -> None:
     routine_noise = (
         "Arcade Menu online.",
@@ -1177,46 +1163,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
     checks.require(init_rule is not None, "regola inizializzazione griglia HUD assente")
     if init_rule:
         init_hud_calls = list(iter_calls(init_rule.body, "Create HUD Text"))
-        checks.equal(len(init_hud_calls), 5, "numero HUD fissi nella regola iniziale")
-
-    closed_menu = (
-        "And(And(Has Spawned(Current Array Element), Is Alive(Current Array Element)), "
-        "And(Player Variable(Current Array Element, MenuOpen) == False, "
-        "Player Variable(Current Array Element, LuckActive) == False))"
-    )
-    travel_ready = (
-        f"And({closed_menu}, And(Player Variable(Current Array Element, CrouchTravelEnabled) == True, "
-        "Is Button Held(Current Array Element, Button(Crouch)) == False))"
-    )
-    nocturne_text = (
-        'Custom String("Hold {0} + {1} for 0.5s: open Nocturne", Input Binding String(Button(Crouch)), '
-        'Input Binding String(Button(Melee)))'
-    )
-    travel_subheader = r'Custom String(" \nHold {0}: open Travel", Input Binding String(Button(Crouch)))'
-    for order, name, condition, content_index, content, content_description in (
-        ("1", "Nocturne", closed_menu, 3, nocturne_text, "binding personali e durata"),
-        ("2", "Travel", travel_ready, 2, travel_subheader, "sottotitolo con una riga di spazio"),
-    ):
-        label = f"HUD apertura {name}"
-        hints = [call for call in hud_calls if call.args[4:6] == ("Top", order)]
-        checks.equal(len(hints), 1, f"{label}: uno slot Top {order}")
-        if not hints:
-            continue
-        hint = hints[0]
-        checks.require(init_rule is not None and init_rule.start <= hint.start < init_rule.end,
-                       f"{label}: creazione nella regola iniziale")
-        blank_index, blank_field = (2, "Subheader") if content_index == 3 else (3, "Text")
-        checks.equal(hint.args[blank_index], "Null", f"{label}: campo {blank_field} vuoto")
-        audience = f"Filtered Array(Global.HumanPlayers, {condition})"
-        checks.equal(clipboard_import.canonical_semantic_text(hint.args[0], "en-US"),
-                     clipboard_import.canonical_semantic_text(audience, "en-US"),
-                     f"{label}: pubblico del promemoria")
-        checks.equal(clipboard_import.canonical_semantic_text(hint.args[content_index], "en-US"),
-                     clipboard_import.canonical_semantic_text(content, "en-US"),
-                     f"{label}: {content_description}")
-        checks.equal(hint.args[6:], ("Color(White)", "Color(White)", "Color(White)",
-                                    "Visible To and String", "Visible Never"),
-                     f"{label}: colore bianco e rivalutazione di testo e pubblico")
+        checks.equal(len(init_hud_calls), 3, "numero HUD fissi nella regola iniziale")
 
     global_hud_calls = [
         call for call in hud_calls
@@ -1289,7 +1236,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
             checks.require(label in localized_field,
                            f"HUD fisso {slot[0]} sort {slot[1]}: testo localizzato assente: {label}")
 
-    checks.require(not any(len(call.args) >= 6 and call.args[0].strip() == "Global.HumanPlayers"
+    checks.require(not any(len(call.args) >= 6
                            and call.args[4].strip() == "Top" and call.args[5].strip() in ("0", "1", "2")
                            for call in hud_calls), "HUD globali Top 0/1/2 rimossi: centro libero sopra i menu")
 
@@ -1357,8 +1304,8 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                        {("Left", "-2"), ("Left", "-1"), ("Right", "-16")},
                        "help HUD statici rimossi: usare Info / Controls")
 
-    checks.require("5 + Count Of(Filtered Array(Global.PlayerListHudIds" in mask_strings(source),
-                   "diagnostica HUD non include i cinque handle fissi")
+    checks.require("3 + Count Of(Filtered Array(Global.PlayerListHudIds" in mask_strings(source),
+                   "diagnostica HUD non include i tre handle fissi")
 
     roster_rule = next(
         (
@@ -1450,11 +1397,11 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                     if counts and len(counts.args) == 3:
                         checks.equal(
                             re.sub(r"\s+", "", counts.args[1]),
-                            "5+CountOf(FilteredArray(Global.PlayerListHudIds,CurrentArrayElement!=0))"
+                            "3+CountOf(FilteredArray(Global.PlayerListHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.MenuHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.TemporaryEffectHudIds,CurrentArrayElement!=0))"
                             "+CountOf(FilteredArray(Global.FateResultHudIds,CurrentArrayElement!=0))",
-                            "renderer HUD roster Left: conteggio HUD diagnostica deve includere cinque fissi e tutti gli handle",
+                            "renderer HUD roster Left: conteggio HUD diagnostica deve includere tre fissi e tutti gli handle",
                         )
                         checks.equal(
                             re.sub(r"\s+", "", counts.args[2]),
@@ -1618,7 +1565,8 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         calls = list(iter_calls(rule.body, "Create HUD Text"))
         checks.equal(len(calls), 1, f"{subroutine_target(rule)}: un solo Create HUD")
         if calls:
-            checks.equal(calls[0].args[0].strip(), menu_hud_audience(subroutine_target(rule) or ""),
+            expected_owner = "Evaluate Once(Event Player)" if subroutine_target(rule) == "DrawNocturneMenu" else "Event Player"
+            checks.equal(calls[0].args[0].strip(), expected_owner,
                          f"{subroutine_target(rule)}: HUD menu non deve essere nascosto/precaricato")
             checks.equal(calls[0].args[1].strip(), "Null",
                          f"{subroutine_target(rule)}: keep the Header empty")
@@ -1638,7 +1586,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 info_controls = (
                     ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
                     ("+ {0} apply / {1} back / {2} reset*", ("Interact", "Reload", "Ultimate")),
-                    ("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+                    ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
                     ("Inspect: hold {0}; Nocturne closed; Travel off or player/bot/attach", ("Crouch",)),
                     ("Soundtrack: {0} + {1} / {2}: +10 / -10", ("Crouch", "Ability 1", "Ability 2")),
                     ("Travel ON, Nocturne closed: hold {0}; {1} / {2}: next / prev", ("Crouch", "Primary Fire", "Secondary Fire")),
@@ -1704,7 +1652,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                 if subroutine_target(rule) != "DrawTravelMenu":
                     close_controls = [custom for custom in iter_calls(subtitle, "Custom String")
                                       if len(custom.args) == 3
-                                      and parse_literal(custom.args[0]) == "Hold {0} + {1} for 0.5s: close"
+                                      and parse_literal(custom.args[0]) == "Hold {0}: {1} close"
                                       and custom.args[1].strip() == "Input Binding String(Button(Crouch))"
                                       and custom.args[2].strip() == "Input Binding String(Button(Melee))"]
                     checks.require(bool(close_controls),
@@ -1841,7 +1789,7 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
                    and subtitle_branches[0] == "Event Player.MainMenuCursor == 0" else "")
         checks.require("0 - RITES / CONTROLS" in preview, "Main Info preview: title missing")
         preview_controls = (
-            ("{2} + {0} 0.5s: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
+            ("{2} + {0}: Nocturne | {1} 0.5s: camera ({2} released)", ("Melee", "Interact", "Crouch")),
             ("Hold {0}: {1} next / {2} prev", ("Crouch", "Primary Fire", "Secondary Fire")),
             ("+ {0}: all controls", ("Interact",)),
             ("Nocturne closed: hold {0} to inspect hero/HP", ("Crouch",)),
@@ -2095,10 +2043,14 @@ def validate_hud_and_menu(checks: Checks, source: str, rules: list[Rule], player
         for action in owner_engine_actions:
             for call in iter_calls(rule.body, action):
                 if call.args:
-                    allowed_recipient = (name == "ApplyNocturnePage" and action == "Small Message"
-                                         and call.args[0].strip() in
-                                         ("Evaluate Once(Event Player)", "Evaluate Once(Event Player.InspectionTarget)"))
-                    checks.require(call.args[0].strip() == "Event Player" or allowed_recipient,
+                    recipient = call.args[0].strip()
+                    allowed_recipient = action == "Small Message" and (
+                        (name in {"ApplyNocturnePage", "ApplyRevengePage"}
+                         and recipient == "Evaluate Once(Event Player)")
+                        or (name == "ApplyNocturnePage"
+                            and recipient == "Evaluate Once(Event Player.InspectionTarget)")
+                    )
+                    checks.require(recipient == "Event Player" or allowed_recipient,
                                    f"isolamento menu per-player: {name}/{action} owner")
         for action in ("Set Player Variable", "Modify Player Variable"):
             for call in iter_calls(rule.body, action):
@@ -3967,10 +3919,9 @@ def validate_input_contract(checks: Checks, rules: list[Rule]) -> None:
                          "Event Player.MeleeConsumed == False;", "Is Alive(Event Player) == True;"):
             checks.require(required in conditions, f"toggle menu: condizione mancante {required}")
         actions = mask_strings(rule_block(menu_toggle, "actions") or "")
-        checks.require(
-            bool(re.match(r"\s*Wait\(0\.500, Abort When False\);\s*Event Player\.MeleeConsumed = True;", actions)),
-            "toggle menu: tenere entrambi i tasti per 0.500 s prima di consumare Melee",
-        )
+        checks.require(not wait_calls(menu_toggle.body) and bool(re.match(
+            r"\s*Event Player\.MeleeConsumed = True;", actions)),
+            "toggle menu deve essere immediato e consumare Melee una sola volta")
         checks.require("Event Player.CrouchTravelActive == False;" not in conditions,
                        "toggle menu deve funzionare anche con Travel aperto")
 
@@ -4794,7 +4745,6 @@ def validate_scheduler(checks: Checks, source: str, rules: list[Rule], globals_:
         ("scheduler", ("0.050", "Ignore Condition")): 1,
         ("leave ordering", ("0.500", "Ignore Condition")): 1,
         ("bot classification", ("0.016", "Ignore Condition")): 1,
-        ("menu hold", ("0.500", "Abort When False")): 1,
         ("camera hold", ("0.500", "Abort When False")): 1,
         ("lifecycle stages", ("0.050", "Abort When False")): 2,
     })
@@ -7126,18 +7076,10 @@ def validate_bot_isolation(checks: Checks, rules: list[Rule]) -> None:
         for call in iter_calls(rule.body, "Create HUD Text"):
             if call.args:
                 allowed = {"Global.HumanPlayers", "Event Player"}
-                renderer = subroutine_target(rule)
-                if renderer == "ShowFateResult":
+                if subroutine_target(rule) in {"DrawNocturneMenu", "ShowFateResult"}:
                     allowed.add("Evaluate Once(Event Player)")
-                if renderer and "Event Player.MenuHud = Last Text ID;" in mask_strings(rule.body):
-                    allowed = {menu_hud_audience(renderer)}
-                audience = call.args[0].strip()
-                is_filtered_open_hint = (
-                    call.args[4:6] in {("Top", "1"), ("Top", "2")}
-                    and audience.startswith("Filtered Array(Global.HumanPlayers, ")
-                )
-                checks.require(audience in allowed or is_filtered_open_hint,
-                               f"Create HUD Text visibile a bot/dummy: {audience}")
+                checks.require(call.args[0].strip() in allowed,
+                               f"Create HUD Text visibile a bot/dummy: {call.args[0].strip()}")
 
     bot_rule = next(
         (
