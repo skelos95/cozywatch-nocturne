@@ -18,6 +18,7 @@
 - Le conferme di Attach e Revenge acquisiscono i destinatari, i bersagli e il debito mostrato al momento dell'azione.
 - Le notifiche del boost di Dark Roulette e della scadenza di Revenge conservano testo e destinatario scelti quando vengono emesse.
 - La conferma di Attach mostra «Attached.» e i tasti per sganciarsi. Il nome del bersaglio compare nel menu Travel.
+- Travel e Camera richiedono il rilascio di Interact prima di usare lo stesso tasto nell'altro contesto. Questo impedisce anche l'autoeliminazione involontaria se Travel è rimasto sulla pagina Self Kill.
 
 ## 0.8.4 — 2026-11-02
 

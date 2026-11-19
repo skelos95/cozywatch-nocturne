@@ -16,12 +16,20 @@ MENU_COMBO = {"Crouch", "Melee"}
 
 
 class ShortcutRuntimeEvaluator(SpectatorRuntimeEvaluator):
+    # Camera geometry and teleport physics are native boundaries. Record their
+    # recipients while executing the actual input and Travel application code.
+    PASSIVE_NATIVE = SpectatorRuntimeEvaluator.PASSIVE_NATIVE | {"StartCamera", "Teleport"}
+
     def __init__(self, source):
         self.button_actions = []
         self.kills = []
         super().__init__(source)
 
     def call(self, name, args):
+        if name == "SpawnPoints":
+            return ["team-spawn"]
+        if name == "PositionOf" and args[0] == "team-spawn":
+            return Vector(10, 5, 10)
         if name == "IsMeleeing":
             return self.players[args[0]].get("melee", False)
         if name == "EyePosition":
@@ -182,6 +190,82 @@ class CrouchMeleeMenuTests(unittest.TestCase):
         model.input("owner", MENU_COMBO)
         self.assertTrue(owner["MenuOpen"])
         self.assertEqual(other, saved)
+
+    def test_travel_interact_requires_release_before_camera_hold(self):
+        for camera_mode in (0, 1):
+            with self.subTest(camera_mode=camera_mode):
+                model, owner = self.model(CrouchTravelEnabled=True, TravelCursor=0,
+                                          CameraMode=camera_mode,
+                                          CameraTarget="owner" if camera_mode else None)
+                model.input("owner", {"Crouch"}, now=10)
+                model.input("owner", {"Crouch", "Interact"}, now=10.05)
+                self.assertEqual(sum(event[1] == "Teleport" for event in model.native_log), 1)
+                before = len(model.native_log)
+                for now in (10.1, 10.61, 11):
+                    model.input("owner", {"Interact"}, now=now)
+                    self.assertEqual(owner["CameraMode"], camera_mode)
+                self.assertFalse(owner["CrouchTravelActive"])
+                self.assertFalse(any(event[1] in ("StartCamera", "StopCamera")
+                                     for event in model.native_log[before:]))
+
+                model.input("owner", set(), now=11.1)
+                model.input("owner", {"Interact"}, now=11.2)
+                model.input("owner", {"Interact"}, now=11.69)
+                self.assertEqual(owner["CameraMode"], camera_mode)
+                model.input("owner", {"Interact"}, now=11.71)
+                self.assertEqual(owner["CameraMode"], 1 - camera_mode)
+
+    def test_camera_interact_requires_release_before_remembered_self_kill(self):
+        model, owner = self.model(CrouchTravelEnabled=True, TravelCursor=4)
+        model.input("owner", {"Interact"}, now=10)
+        model.input("owner", {"Interact"}, now=10.51)
+        self.assertEqual(owner["CameraMode"], 1)
+        for now in (10.6, 11.2):
+            model.input("owner", {"Crouch", "Interact"}, now=now)
+            self.assertTrue(owner["alive"])
+            self.assertEqual(model.kills, [])
+        self.assertTrue(owner["CrouchTravelActive"])
+        self.assertEqual(owner["TravelCursor"], 4)
+
+        model.input("owner", {"Crouch"}, now=11.3)
+        model.input("owner", {"Crouch", "Interact"}, now=11.4)
+        self.assertEqual(model.kills, [("owner", None)])
+        self.assertFalse(owner["alive"])
+
+    def test_consumed_camera_interact_does_not_block_travel_navigation(self):
+        for button, expected_cursor in (("PrimaryFire", 0), ("SecondaryFire", 3)):
+            with self.subTest(button=button):
+                model, owner = self.model(CrouchTravelEnabled=True, TravelCursor=4)
+                model.input("owner", {"Interact"}, now=10)
+                model.input("owner", {"Interact"}, now=10.51)
+                model.input("owner", {"Crouch", "Interact", button}, now=10.6)
+                self.assertEqual(owner["TravelCursor"], expected_cursor)
+                self.assertEqual(model.kills, [])
+                self.assertFalse(any(event[1] == "Teleport" for event in model.native_log))
+                model.input("owner", {"Crouch", "Interact", button}, now=11.2)
+                self.assertEqual(owner["TravelCursor"], expected_cursor)
+
+    def test_reopening_travel_requires_new_interact_and_keeps_owners_independent(self):
+        model, owner = self.model(CrouchTravelEnabled=True, TravelCursor=0)
+        other = model.ready_player("other", CrouchTravelEnabled=True, TravelCursor=0)
+        model.input("owner", {"Crouch", "Interact"}, now=10)
+        model.input("owner", {"Interact"}, now=10.1)
+        model.input("owner", {"Crouch", "Interact"}, now=10.2)
+        self.assertEqual(sum(event[1:] == ("Teleport", "owner")
+                             for event in model.native_log), 1)
+        self.assertEqual(owner["CameraMode"], 0)
+        self.assertTrue(owner["CrouchTravelActive"])
+
+        model.input("other", {"Crouch", "Interact"}, now=10.25)
+        self.assertEqual(sum(event[1:] == ("Teleport", "other")
+                             for event in model.native_log), 1)
+        model.input("owner", {"Crouch"}, now=10.3)
+        model.input("owner", {"Crouch", "Interact"}, now=10.4)
+        self.assertEqual(sum(event[1:] == ("Teleport", "owner")
+                             for event in model.native_log), 2)
+        model.input("other", {"Interact"}, now=10.45)
+        model.input("other", {"Interact"}, now=11)
+        self.assertEqual(other["CameraMode"], 0)
 
     def punch_lobby(self, opened=False, protected=False):
         model, owner = self.model(CrouchTravelEnabled=True)

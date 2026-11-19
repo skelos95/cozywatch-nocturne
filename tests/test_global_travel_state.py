@@ -317,7 +317,7 @@ class GlobalTravelStateTests(unittest.TestCase):
                 model.tick("viewer", "19a", "19e")
                 self.assertEqual(model.native_calls, before)
                 state["held"] = {"Crouch"}
-                model.tick("viewer", "19b", "19e")
+                model.tick("viewer", "12d", "19b", "19e")
                 self.assertEqual(state["TravelCommand"], 0)
                 self.assertEqual(state[model.state_field][model.latch_index("19e")], 0)
                 model.now = 13

@@ -2503,7 +2503,8 @@ rule("19a - Crouch Travel: Primary Fire advances, Secondary Fire reverses, Inter
 			Event Player.TravelCommand = 1;
 		Else If(Is Button Held(Event Player, Button(Secondary Fire)));
 			Event Player.TravelCommand = 2;
-		Else;
+		Else If(And(Is Button Held(Event Player, Button(Interact)), Event Player.CameraInteractConsumed == False));
+			Event Player.CameraInteractConsumed = True;
 			Event Player.TravelCommand = 3;
 		End;
 	}
