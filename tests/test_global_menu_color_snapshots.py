@@ -64,7 +64,7 @@ class MenuColors(CompactionContext):
 class GlobalMenuColorSnapshotTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.text = gate.english((ROOT / 'workshop/ruang_irama.en-US.workshop').read_text(encoding='utf-8'))
+        cls.text = gate.english((ROOT / 'workshop/cozywatch-nocturne.en-US.workshop').read_text(encoding='utf-8'))
         cls.rules = semantic.extract_rules(cls.text)
         cls.palette = semantic.rule_by_subroutine(cls.rules, "TransitionMenuColor")
         cls.chases = list(semantic.iter_calls(cls.palette.body, 'Chase Player Variable Over Time'))

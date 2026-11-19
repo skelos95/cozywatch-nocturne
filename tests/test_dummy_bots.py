@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class DummyBotFeatureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.it = (ROOT / "source" / "ruang_irama.en-US.source").read_text(encoding="utf-8")
+        cls.it = (ROOT / "source" / "cozywatch-nocturne.en-US.source").read_text(encoding="utf-8")
         cls.en = (ROOT / "tests" / "fixtures" / "semantic_reference.txt").read_text(encoding="utf-8")
 
     def test_static_hud_uses_recyclable_roster_slots_without_embedded_label_spacing(self):
@@ -165,8 +165,8 @@ class DummyBotFeatureTests(unittest.TestCase):
 
     def test_stationary_dummy_speed_preserves_normal_ai_movement_in_all_artifacts(self):
         for path in (
-            "source/ruang_irama.en-US.source", "tests/fixtures/semantic_reference.txt",
-            "workshop/ruang_irama.en-US.workshop", "tests/fixtures/global_runtime_reference.txt",
+            "source/cozywatch-nocturne.en-US.source", "tests/fixtures/semantic_reference.txt",
+            "workshop/cozywatch-nocturne.en-US.workshop", "tests/fixtures/global_runtime_reference.txt",
         ):
             text = (ROOT / path).read_text(encoding="utf-8")
             rules = validator.extract_rules(text)

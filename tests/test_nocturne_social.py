@@ -19,9 +19,9 @@ from tests.test_fly_motion import Vector
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACTS = (ROOT / "source/ruang_irama.en-US.source",
+ARTIFACTS = (ROOT / "source/cozywatch-nocturne.en-US.source",
              ROOT / "tests/fixtures/semantic_reference.txt",
-             ROOT / "workshop/ruang_irama.en-US.workshop")
+             ROOT / "workshop/cozywatch-nocturne.en-US.workshop")
 DEFAULT = [0, 0, 0, 0, 0, True, 0, 0, 0, False, "The pages await your hand.", None, "", 0, True]
 CATALOGUES = ("PresenceNames", "FateNames", "WhisperNames", "AuraNames", "OmenLines")
 

@@ -11,7 +11,7 @@ from tests.test_fly_motion import Expression
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = (
-    (ROOT / "source" / "ruang_irama.en-US.source", "rule", "Global"),
+    (ROOT / "source" / "cozywatch-nocturne.en-US.source", "rule", "Global"),
     (ROOT / "tests" / "fixtures" / "semantic_reference.txt", "rule", "Global"),
 )
 

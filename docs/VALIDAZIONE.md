@@ -1,12 +1,12 @@
 # Controlli automatici
 
-I controlli del codice **0.8.5**, tema **Nocturne**, richiedono **Python 3.12**, senza pacchetti esterni. I risultati vanno associati al commit verificato; le release precedenti conservano i pacchetti storici. Eseguire dalla radice del repository:
+I controlli del codice **0.8.6**, tema **Nocturne**, richiedono **Python 3.12**, senza pacchetti esterni. Associare i risultati al commit verificato. Le release precedenti conservano i pacchetti storici. Eseguire i comandi dalla radice del repository.
 
 ```text
 python tools/validate_workshop.py
 python tools/build_global_runtime.py --check
 python tools/validate_global_runtime.py
-python tools/check_clipboard_import.py workshop/ruang_irama.en-US.workshop --language en-US
+python tools/check_clipboard_import.py workshop/cozywatch-nocturne.en-US.workshop --language en-US
 python -m unittest discover -s tests -p "test_*.py"
 git diff --check
 ```
@@ -68,7 +68,7 @@ Un nuovo aggiornamento della stessa PR annulla l'esecuzione precedente. Quel vec
 
 ## Modificare e verificare
 
-1. Modificare `source/ruang_irama.en-US.source` e la specifica `tests/fixtures/semantic_reference.txt` in modo equivalente. Modificare il compilatore se cambia l'architettura globale.
+1. Modificare `source/cozywatch-nocturne.en-US.source` e la specifica `tests/fixtures/semantic_reference.txt` in modo equivalente. Modificare il compilatore se cambia l'architettura globale.
 2. Eseguire `python tools/build_global_runtime.py` per generare il clipboard e il riferimento runtime EN; `--check` verifica senza modificare file.
 3. Eseguire i test pertinenti e i due gate; eseguire la suite completa prima dell'unione.
 4. Per documentazione e strumenti mantenere collegamenti validi e distinguere stato corrente da risultati storici.

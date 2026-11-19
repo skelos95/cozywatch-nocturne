@@ -297,7 +297,7 @@ class MenuResetTests(unittest.TestCase):
 
 class GeneratedResetInputTests(unittest.TestCase):
     def models(self):
-        for path in ("workshop/ruang_irama.en-US.workshop", "tests/fixtures/global_runtime_reference.txt"):
+        for path in ("workshop/cozywatch-nocturne.en-US.workshop", "tests/fixtures/global_runtime_reference.txt"):
             yield path, GeneratedControllerEvaluator((ROOT / path).read_text(encoding="utf-8"))
 
     def test_generated_press_hold_release_repress_dispatches_only_the_reset_owner(self):

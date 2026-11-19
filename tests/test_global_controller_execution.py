@@ -17,7 +17,7 @@ from tests.test_fly_motion import Expression
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RUNTIME = ROOT / "workshop/ruang_irama.en-US.workshop"
+RUNTIME = ROOT / "workshop/cozywatch-nocturne.en-US.workshop"
 
 
 class ControllerExpression(Expression):

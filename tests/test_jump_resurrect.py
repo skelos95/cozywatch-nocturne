@@ -106,7 +106,7 @@ class JumpEvaluator(SpawnEvaluator):
 
 class JumpResurrectTests(unittest.TestCase):
     def models(self):
-        for path in (ROOT / "source/ruang_irama.en-US.source",
+        for path in (ROOT / "source/cozywatch-nocturne.en-US.source",
                      ROOT / "tests/fixtures/semantic_reference.txt"):
             yield path.name, JumpEvaluator(path.read_text(encoding="utf-8"))
 

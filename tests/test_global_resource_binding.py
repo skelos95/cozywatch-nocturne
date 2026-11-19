@@ -155,7 +155,7 @@ class ResourceExpressions:
 class GlobalResourceBindingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.text = (ROOT / "workshop/ruang_irama.en-US.workshop").read_text(encoding="utf-8")
+        cls.text = (ROOT / "workshop/cozywatch-nocturne.en-US.workshop").read_text(encoding="utf-8")
         cls.normalized = runtime.english(cls.text)
         if "Ongoing - Each Player" in cls.normalized:
             raise AssertionError("tests must exercise the generated global artifact")

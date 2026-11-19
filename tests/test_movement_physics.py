@@ -11,7 +11,7 @@ from tests.test_global_spectator_rejoin import SpectatorRuntimeEvaluator
 from tools import validate_workshop as semantic
 
 
-RUNTIME = Path(__file__).resolve().parents[1] / "workshop/ruang_irama.en-US.workshop"
+RUNTIME = Path(__file__).resolve().parents[1] / "workshop/cozywatch-nocturne.en-US.workshop"
 
 
 class MovementPhysicsEvaluator(SpectatorRuntimeEvaluator):

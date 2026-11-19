@@ -256,7 +256,7 @@ class SocialBeaconTests(unittest.TestCase):
 
     def test_compiled_icon_expressions_capture_owner_but_follow_live_position_and_color(self):
         root = Path(__file__).resolve().parents[1]
-        for path in (root / "workshop/ruang_irama.en-US.workshop",
+        for path in (root / "workshop/cozywatch-nocturne.en-US.workshop",
                      root / "tests/fixtures/global_runtime_reference.txt"):
             with self.subTest(source=path.name):
                 source = path.read_text(encoding="utf-8")
@@ -314,7 +314,7 @@ class SocialBeaconTests(unittest.TestCase):
 
     def test_compiled_visibility_cache_needs_owner_but_never_an_objective(self):
         root = Path(__file__).resolve().parents[1]
-        for path in (root / "workshop/ruang_irama.en-US.workshop",
+        for path in (root / "workshop/cozywatch-nocturne.en-US.workshop",
                      root / "tests/fixtures/global_runtime_reference.txt"):
             with self.subTest(source=path.name):
                 source = path.read_text(encoding="utf-8")

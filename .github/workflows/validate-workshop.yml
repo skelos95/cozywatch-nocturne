@@ -105,7 +105,7 @@ jobs:
         run: python tools/validate_workshop.py
 
       - name: Preflight compiled English clipboard output
-        run: python tools/check_clipboard_import.py workshop/ruang_irama.en-US.workshop --language en-US
+        run: python tools/check_clipboard_import.py workshop/cozywatch-nocturne.en-US.workshop --language en-US
 
   required:
     name: Required checks

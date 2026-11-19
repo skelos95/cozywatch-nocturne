@@ -16,7 +16,7 @@ from tests.test_direct_menu_toggles import DirectToggleEvaluator
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = (*[path for path, _, _ in SOURCES],
-             ROOT / "workshop/ruang_irama.en-US.workshop")
+             ROOT / "workshop/cozywatch-nocturne.en-US.workshop")
 MENU_PREFIXES = ("91a", "91b", "91c", "91d", "91f", "91g", "91h",
                  "91i", "91j", "91n", "91o", "91s", "91t", "91v")
 MAIN_INFO_CONTROLS = (
@@ -211,7 +211,7 @@ class EnglishMenuLayoutTests(unittest.TestCase):
                 self.assertEqual(subtitle.evaluate(context), normal)
 
     def test_compiled_main_hud_reevaluates_info_and_name_color_with_empty_global_actors(self):
-        for path in (ROOT / "workshop/ruang_irama.en-US.workshop",
+        for path in (ROOT / "workshop/cozywatch-nocturne.en-US.workshop",
                      ROOT / "tests/fixtures/global_runtime_reference.txt"):
             with self.subTest(artifact=path.name):
                 text = path.read_text(encoding="utf-8")

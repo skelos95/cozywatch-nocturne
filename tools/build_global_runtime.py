@@ -663,8 +663,8 @@ def build(source: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=Path, default=REPO / "source" / "ruang_irama.en-US.source")
-    parser.add_argument("--output", type=Path, default=REPO / 'workshop' / 'ruang_irama.en-US.workshop')
+    parser.add_argument("--source", type=Path, default=REPO / "source" / "cozywatch-nocturne.en-US.source")
+    parser.add_argument("--output", type=Path, default=REPO / 'workshop' / 'cozywatch-nocturne.en-US.workshop')
     parser.add_argument('--reference', type=Path, default=REPO / 'tests' / 'fixtures' / 'global_runtime_reference.txt')
     parser.add_argument('--check', action='store_true', help='Verify both generated files without writing them.')
     args = parser.parse_args()

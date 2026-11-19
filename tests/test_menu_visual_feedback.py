@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class MenuVisualFeedbackTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        italian = (ROOT / "source/ruang_irama.en-US.source").read_text(encoding="utf-8")
+        italian = (ROOT / "source/cozywatch-nocturne.en-US.source").read_text(encoding="utf-8")
         segments = re.split(r'("(?:\\.|[^"\\])*")', italian)
         for index in range(0, len(segments), 2):
             for original, translated in clipboard.ITALIAN_TO_ENGLISH_TOKENS:
@@ -110,9 +110,9 @@ class RGBContext(CompactionContext):
 class FullRGBTests(unittest.TestCase):
     def test_full_rgb_cycle_is_continuous_and_preserved_by_global_compilation(self):
         artifacts = (
-            "source/ruang_irama.en-US.source",
+            "source/cozywatch-nocturne.en-US.source",
             "tests/fixtures/semantic_reference.txt",
-            "workshop/ruang_irama.en-US.workshop",
+            "workshop/cozywatch-nocturne.en-US.workshop",
             "tests/fixtures/global_runtime_reference.txt",
         )
         reference = None

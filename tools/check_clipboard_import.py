@@ -18,10 +18,10 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SOURCE = ROOT / "workshop" / "ruang_irama.en-US.workshop"
+DEFAULT_SOURCE = ROOT / "workshop" / "cozywatch-nocturne.en-US.workshop"
 ENGLISH_SOURCE = DEFAULT_SOURCE
 SEMANTIC_REFERENCE = ROOT / "tests" / "fixtures" / "global_runtime_reference.txt"
-BEHAVIORAL_SOURCE = ROOT / "source" / "ruang_irama.en-US.source"
+BEHAVIORAL_SOURCE = ROOT / "source" / "cozywatch-nocturne.en-US.source"
 BEHAVIORAL_REFERENCE = ROOT / "tests" / "fixtures" / "semantic_reference.txt"
 
 CLIENT_LARGEST_RULE_LIMIT_BYTES = 98_000

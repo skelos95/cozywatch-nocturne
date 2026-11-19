@@ -4,12 +4,12 @@ Modalità sociale per **Overwatch: Schermaglia, 6v6, fino a 12 giocatori contemp
 
 Il tema **Nocturne** unisce romanticismo oscuro e melodic death metal: argento lunare, malva, rose appassite, cappelle ed echi. I testi nel gioco sono brevi e in inglese; la documentazione è in italiano.
 
-**[Codice da importare](workshop/ruang_irama.en-US.workshop)** · [Importazione](docs/IMPORTAZIONE.md) · [Manuale completo](docs/MANUALE.md)
+**[Codice da importare](workshop/cozywatch-nocturne.en-US.workshop)** · [Importazione](docs/IMPORTAZIONE.md) · [Manuale completo](docs/MANUALE.md)
 
 ## Avvio rapido
 
 1. Salva il preset della lobby e imposta la lingua testo del client su **English**.
-2. Apri il [file Workshop](workshop/ruang_irama.en-US.workshop), scegli **Raw** e copia tutto in **Custom Game → Settings → Workshop → Paste Rules**.
+2. Apri il [file Workshop](workshop/cozywatch-nocturne.en-US.workshop), scegli **Raw** e copia tutto in **Custom Game → Settings → Workshop → Paste Rules**.
 3. Configura **Skirmish**, fino a 6 slot per squadra e le mappe standard desiderate, escluse quelle Workshop. Il file contiene le regole, non il preset delle mappe.
 4. Scegli la durata nelle impostazioni Workshop: **30–60 minuti**, default **30**. Allo zero la partita si riavvia.
 5. Al primo spawn trovi **Rites / Controls**: tieni Crouch e premi Interact per aprire la guida completa.
@@ -63,7 +63,7 @@ Privacy blocca Camera, inspection, Teleport, Attach e Whispers verso di te e mos
 
 ## Stato attuale
 
-[VERSION](VERSION) è **0.8.5**. Crouch + Melee apre o chiude Nocturne alla pressione. La guida Rites / Controls riepiloga i comandi. [Changelog](CHANGELOG.md).
+[VERSION](VERSION) è **0.8.6**. Crouch + Melee apre o chiude Nocturne alla pressione. La guida Rites / Controls riepiloga i comandi. [Changelog](CHANGELOG.md).
 
 I controlli automatici verificano struttura, regressioni e budget del runtime globale. Importazione, leggibilità, fisica e carico richiedono una prova nel client sul **commit esatto**: i [riscontri disponibili](docs/TEST.md#riscontri-disponibili) distinguono quanto già provato dalle modifiche successive. Conteggi e limiti sono raccolti in [Validazione](docs/VALIDAZIONE.md).
 

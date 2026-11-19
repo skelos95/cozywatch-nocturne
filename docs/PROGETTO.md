@@ -1,11 +1,11 @@
 # Architettura del Workshop
 
-Questa pagina descrive il sorgente **0.8.5**, inclusi i menu sociali Nocturne. Le release precedenti conservano i rispettivi pacchetti. Comandi e menu sono nel [manuale](MANUALE.md); storia e revisioni ritirate nel [changelog](../CHANGELOG.md).
+Questa pagina descrive il sorgente **0.8.6**, inclusi i menu sociali Nocturne. Le release precedenti conservano i rispettivi pacchetti. I comandi e i menu sono nel [manuale](MANUALE.md). La storia e le revisioni ritirate sono nel [changelog](../CHANGELOG.md).
 
 ## Sorgenti e confini
 
-- `workshop/ruang_irama.en-US.workshop`: unico clipboard pubblico, generato per client inglese e con esecuzione globale.
-- `source/ruang_irama.en-US.source` e `tests/fixtures/semantic_reference.txt`: specifica comportamentale inglese e riferimento dei test. Le regole per-player descrivono il comportamento d'ingresso al compilatore; non vengono importate nel gioco.
+- `workshop/cozywatch-nocturne.en-US.workshop`: unico clipboard pubblico, generato per client inglese e con esecuzione globale.
+- `source/cozywatch-nocturne.en-US.source` e `tests/fixtures/semantic_reference.txt`: specifica comportamentale inglese e riferimento dei test. Le regole per-player descrivono il comportamento d'ingresso al compilatore; non vengono importate nel gioco.
 - `tools/build_global_runtime.py`: trasforma la specifica in controller globali e produce anche `tests/fixtures/global_runtime_reference.txt`, equivalente al clipboard finale. `--check` rifiuta output non aggiornati.
 - Identificatori, nomi regola, commenti e keyword native usano soltanto l’inglese. HUD, feedback, cataloghi e impostazioni personalizzate sono in inglese, senza selettore o stato della lingua.
 - La modalità si chiama Cozywatch e usa il tema Nocturne, ispirato al romanticismo oscuro e al melodic death metal. Le regole supportano Schermaglia; mappe e slot si configurano nella lobby. Il timer dura 30–60 minuti, default 30. Il sottotitolo in alto a destra mostra `cozywatch.org [countdown]`, sopra HOST con una riga vuota tra i due; impostazione e cataloghi delle località sono rimossi.
