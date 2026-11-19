@@ -2447,7 +2447,8 @@ rule("62 - Crouch Travel: Primary Fire advances, Secondary Fire reverses, Intera
 		Global.TriggerPlayer.TravelCommand = 1;
 		Else If(Is Button Held(Global.TriggerPlayer, Button(Secondary Fire)));
 		Global.TriggerPlayer.TravelCommand = 2;
-		Else;
+		Else If(And(Is Button Held(Global.TriggerPlayer, Button(Interact)), Not(Global.TriggerPlayer.CameraInteractConsumed)));
+		Global.TriggerPlayer.CameraInteractConsumed = True;
 		Global.TriggerPlayer.TravelCommand = 3;
 		End;
 	}
