@@ -1,11 +1,12 @@
 # Test nel gioco
 
-Questa è la matrice operativa per il codice **0.8.5**, tema **Nocturne**. Le release 0.8.2 e 0.8.3 conservano i pacchetti storici. Eseguire prima i [controlli automatici](VALIDAZIONE.md), poi associare ogni prova al commit importato.
+Questa è la matrice operativa per il codice **0.8.6**, tema **Nocturne**. Le release precedenti conservano i pacchetti storici. Eseguire prima i [controlli automatici](VALIDAZIONE.md), poi associare ogni prova al commit importato.
 
 ## Riscontri disponibili
 
 | Data / revisione | Riscontro | Limite |
 |---|---|---|
+| 19 novembre 2026, dopo la [PR #132](https://github.com/skelos95/cozywatch-nocturne/pull/132) | L'utente conferma che la correzione di Interact tra Camera e Travel funziona in gioco e approva l'apertura e la chiusura immediate di Nocturne con Crouch + Melee. | Il commit condiviso era `66990f1`. Il commit importato, i singoli scenari provati e le metriche del client non sono stati indicati. |
 | 0.8.5, dopo la PR #127 | L'utente conferma il funzionamento dopo le correzioni al promemoria Melee e alla notifica Self Kill. | Riscontro qualitativo sulle due correzioni. SHA importato, build del client, durata, numero di giocatori e metriche native non indicati. |
 | 6 novembre, riscontro utente sul codice in uso | L'utente conferma di avere già eseguito i test e che «funziona tutto». | Riscontro precedente alla nuova revisione testuale dei menu; non identifica lo SHA importato. |
 | 3 novembre, riscontro utente sulla 0.8.4 | L’utente conferma: «funziona tutto». | Riscontro qualitativo generale; build client, durata, numero di player e metriche native non forniti. |
@@ -45,11 +46,11 @@ Il riscontro generale «funziona tutto», ricevuto il 28 ottobre dopo la PR #114
 
 ## Preparazione
 
-Il clipboard corrente viene generato dalla specifica comportamentale. Importare soltanto `workshop/ruang_irama.en-US.workshop`: i test dei vecchi contratti sulla specifica non certificano il nuovo contesto di esecuzione.
+Il clipboard corrente viene generato dalla specifica comportamentale. Importare soltanto `workshop/cozywatch-nocturne.en-US.workshop`: i test dei vecchi contratti sulla specifica non certificano il nuovo contesto di esecuzione.
 
 Per il runtime globale iniziare con una lobby nuova, un umano e dummy presenti: primo cambio diretto 1→2, poi 2→1 senza usare menu. Confrontare il percorso via spettatori; ripetere ingresso/uscita e cambi rapidi con 12 umani. Provare la pressione di Melee con Crouch tenuto per il menu, Interact tenuto 0,5 s con Crouch rilasciato per la Camera e i comandi simultanei: timer, testi e colori devono restare individuali. Verificare Revenge dopo KO nemici/alleati, morte e rinascita rapida, cambio eroe durante un evento pendente, e la pulizia dopo uscita e riuso dello stesso slot.
 
-Usare una nuova lobby sulla build corrente del client, lingua testo English, Schermaglia e mappe standard escluse quelle Workshop. Importare il [file completo](../workshop/ruang_irama.en-US.workshop), annotando SHA e metriche di compilazione. Le mappe appartengono al preset della lobby.
+Usare una nuova lobby sulla build corrente del client, lingua testo English, Schermaglia e mappe standard escluse quelle Workshop. Importare il [file completo](../workshop/cozywatch-nocturne.en-US.workshop), annotando SHA e metriche di compilazione. Le mappe appartengono al preset della lobby.
 
 Per i riscontri del 9 ottobre, l'utente indica il 7 ottobre 2026 come data dell'aggiornamento del proprio client, con stagione 5, Doctrine e Grimsvötn. Registrare anche l'identificativo della build client nelle nuove prove. L'annuncio ufficiale Blizzard colloca l'avvio della stagione al **6 ottobre**, con Doctrine e la nuova mappa Escort **Watchpoint: Grímsvötn**; le due date restano distinte. [Annuncio Blizzard della stagione 5](https://overwatch.blizzard.com/en-us/news/24303008/stillt-euren-hunger-mit-talons-herrschaft-saison-5-eine-duestere-doktrin/).
 

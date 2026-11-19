@@ -203,8 +203,8 @@ def validate_generated(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     try:
         from tools import build_global_runtime as compiler
-        source = (root / "source/ruang_irama.en-US.source").read_text(encoding="utf-8")
-        runtime = (root / "workshop/ruang_irama.en-US.workshop").read_text(encoding="utf-8")
+        source = (root / "source/cozywatch-nocturne.en-US.source").read_text(encoding="utf-8")
+        runtime = (root / "workshop/cozywatch-nocturne.en-US.workshop").read_text(encoding="utf-8")
         expected = compiler.build(source)
         if runtime != expected:
             errors.append("runtime globale obsoleto: rigenerare con build_global_runtime.py")

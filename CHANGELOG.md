@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.6 — 2026-11-19
+
+- Camera e Travel condividono il blocco di Interact. Rilasciare il tasto prima di usarlo nell'altro contesto evita anche il Self Kill involontario. La correzione è stata confermata in gioco dall'utente.
+- Crouch + Melee apre e chiude Nocturne alla pressione. La Camera continua a richiedere Interact tenuto per 0,5 secondi.
+- La release include i titoli Nocturne e gli aggiornamenti alle notifiche di Self Kill, Attach, Revenge e Dark Roulette già elencati nella sezione 0.8.5.
+- Il sorgente si chiama `cozywatch-nocturne.en-US.source` e il file da importare `cozywatch-nocturne.en-US.workshop`.
+
 ## 0.8.5 — 2026-11-12
 
 - Aggiunto un promemoria in alto al centro con i binding per aprire Nocturne e Travel. Tenere Crouch nasconde la sola indicazione Travel. Aprire Nocturne nasconde il promemoria.

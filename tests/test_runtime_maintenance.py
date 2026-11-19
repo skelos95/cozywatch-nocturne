@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class RuntimeMaintenanceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.it = (ROOT / "source" / "ruang_irama.en-US.source").read_text(encoding="utf-8")
+        cls.it = (ROOT / "source" / "cozywatch-nocturne.en-US.source").read_text(encoding="utf-8")
         cls.en = (ROOT / "tests" / "fixtures" / "semantic_reference.txt").read_text(encoding="utf-8")
 
     def test_display_name_is_not_used_as_cleanup_identity(self):

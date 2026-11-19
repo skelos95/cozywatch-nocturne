@@ -12,7 +12,7 @@ from tools import validate_workshop as semantic
 
 @lru_cache(maxsize=1)
 def logical_rules():
-    path = Path(__file__).resolve().parents[1] / "source/ruang_irama.en-US.source"
+    path = Path(__file__).resolve().parents[1] / "source/cozywatch-nocturne.en-US.source"
     return semantic.extract_rules(path.read_text(encoding="utf-8"))
 
 

@@ -37,7 +37,7 @@ class CompactionContext:
             "EntityExists", "IsAlive", "IsDummyBot", "HasSpawned",
             "IsOnGround", "IsInSpawnRoom", "IsButtonHeld", "HasStatus")}
         self.native["Health"] = 0
-        source = (ROOT / "source/ruang_irama.en-US.source").read_text(encoding="utf-8")
+        source = (ROOT / "source/cozywatch-nocturne.en-US.source").read_text(encoding="utf-8")
         for name in ("PresenceNames", "FateNames", "WhisperNames", "AuraNames", "OmenLines"):
             values = semantic.array_assignment_items(source, name)
             if values is not None:
@@ -108,8 +108,8 @@ def folded_operand(expression, initialization=""):
 class GlobalCompactionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.logical = compiler.translate((ROOT / "source/ruang_irama.en-US.source").read_text(encoding="utf-8"))
-        cls.runtime, _ = compiler.build_english((ROOT / "source/ruang_irama.en-US.source").read_text(encoding="utf-8"))
+        cls.logical = compiler.translate((ROOT / "source/cozywatch-nocturne.en-US.source").read_text(encoding="utf-8"))
+        cls.runtime, _ = compiler.build_english((ROOT / "source/cozywatch-nocturne.en-US.source").read_text(encoding="utf-8"))
         cls.rules = semantic.extract_rules(cls.logical)
         cls.emitted = semantic.extract_rules(cls.runtime)
         _, fields, _, _ = semantic.declaration_entries(cls.logical)
@@ -328,7 +328,7 @@ class GlobalExpressionEmissionTests(unittest.TestCase):
                 self.assertEqual(compiler._emit(compiler._Expression(source).tree), expected)
 
     def test_actual_import_restores_negative_sentinels_and_contains_no_unary_parentheses(self):
-        runtime = (ROOT / 'workshop/ruang_irama.en-US.workshop').read_text(encoding='utf-8')
+        runtime = (ROOT / 'workshop/cozywatch-nocturne.en-US.workshop').read_text(encoding='utf-8')
         syntax = semantic.mask_strings(runtime)
         self.assertIn('Global.LeavingPlayerIndex = -1;', syntax)
         self.assertIn('Global.LastHudSlot = -1;', syntax)
@@ -359,7 +359,7 @@ Custom String("Global. All; Ongoing - Global; All Players");
         self.assertEqual(compiler.translate(english, to_italian=True), expected)
 
     def test_import_artifact_keeps_all_native_function_identifiers(self):
-        italian = (ROOT / 'workshop/ruang_irama.en-US.workshop').read_text(encoding='utf-8')
+        italian = (ROOT / 'workshop/cozywatch-nocturne.en-US.workshop').read_text(encoding='utf-8')
         english = (ROOT / 'tests/fixtures/global_runtime_reference.txt').read_text(encoding='utf-8')
         syntax = semantic.mask_strings(english)
         names = set(re.findall(r'\b([A-Z][A-Za-z0-9]*(?:[ -][A-Za-z0-9]+)*)\s*\(', syntax))

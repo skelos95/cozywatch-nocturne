@@ -244,7 +244,7 @@ class MovementMenuTests(unittest.TestCase):
 
     def test_generated_hud_uses_live_viewer_values_after_global_dispatch_clears(self):
         root = SOURCES[0][0].parents[1]
-        for path in (root / "workshop/ruang_irama.en-US.workshop",
+        for path in (root / "workshop/cozywatch-nocturne.en-US.workshop",
                      root / "tests/fixtures/global_runtime_reference.txt"):
             with self.subTest(artifact=path.name):
                 text = path.read_text(encoding="utf-8")

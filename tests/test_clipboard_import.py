@@ -19,7 +19,7 @@ class ClipboardImportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.source_path = ROOT / "tests" / "fixtures" / "global_runtime_reference.txt"
-        cls.output_path = ROOT / "workshop" / "ruang_irama.en-US.workshop"
+        cls.output_path = ROOT / "workshop" / "cozywatch-nocturne.en-US.workshop"
         cls.source = cls.source_path.read_text(encoding="utf-8")
         cls.output = cls.output_path.read_text(encoding="utf-8")
         # Keep generic Italian parser coverage with a synthetic translation.
@@ -54,8 +54,7 @@ class ClipboardImportTests(unittest.TestCase):
 
     def test_only_english_workshop_is_user_facing(self) -> None:
         self.assertTrue(self.output_path.is_file())
-        self.assertFalse((ROOT / "workshop" / "ruang_irama.workshop").exists())
-        self.assertFalse((ROOT / "workshop" / "ruang_irama.it-IT.workshop").exists())
+        self.assertEqual(list(self.output_path.parent.glob("*.workshop")), [self.output_path])
         self.assertEqual(clipboard.check_path(self.output_path, "en-US").language, "en-US")
         self.assertEqual(self.source, self.output)
 
@@ -158,7 +157,7 @@ class ClipboardImportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=ROOT.parent) as temp_dir:
             temp_root = Path(temp_dir)
             reference_path = temp_root / "global_runtime_reference.txt"
-            output_path = temp_root / "ruang_irama.en-US.workshop"
+            output_path = temp_root / "cozywatch-nocturne.en-US.workshop"
             reference_path.write_text(self.source, encoding="utf-8")
             output_path.write_text(mutated, encoding="utf-8")
             with (

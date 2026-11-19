@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Semantic static gate for Cozywatch Workshop 0.8.5.
+"""Semantic static gate for Cozywatch Workshop 0.8.6.
 
 The behavioral contracts validate the explicit logical input, while main also
 checks its English source parity and the real generated global runtime. No compiled
@@ -31,7 +31,7 @@ SOURCE = BEHAVIORAL_REFERENCE
 VERSION = ROOT / "VERSION"
 WORKFLOWS = ROOT / ".github" / "workflows"
 
-CURRENT_VERSION = "0.8.5"
+CURRENT_VERSION = "0.8.6"
 ALLOWED_WORKFLOWS = {"validate-workshop.yml"}
 MAX_DECLARATION_NAME_BYTES = 32
 CORE_DOCS = (

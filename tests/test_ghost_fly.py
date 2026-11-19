@@ -39,7 +39,7 @@ def subroutine(source: str, name: str) -> str:
 class GhostFlyRuntimeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.it = (ROOT / "source" / "ruang_irama.en-US.source").read_text(encoding="utf-8")
+        cls.it = (ROOT / "source" / "cozywatch-nocturne.en-US.source").read_text(encoding="utf-8")
         cls.en = (ROOT / "tests" / "fixtures" / "semantic_reference.txt").read_text(encoding="utf-8")
         cls.sources = (
             (cls.it, "Global"),

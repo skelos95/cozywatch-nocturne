@@ -17,7 +17,7 @@ from tools import validate_workshop as semantic
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "workshop/ruang_irama.en-US.workshop"
+ARTIFACT = ROOT / "workshop/cozywatch-nocturne.en-US.workshop"
 
 
 class EventQueueEvaluator(GeneratedControllerEvaluator):

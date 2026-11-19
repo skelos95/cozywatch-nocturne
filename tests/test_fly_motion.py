@@ -310,9 +310,9 @@ class FlyMotionExpressionTests(unittest.TestCase):
         cls.programs = tuple(
             (path.name, motion_statements(path.read_text(encoding="utf-8")))
             for path in (
-                ROOT / "source" / "ruang_irama.en-US.source",
+                ROOT / "source" / "cozywatch-nocturne.en-US.source",
                 ROOT / "tests" / "fixtures" / "semantic_reference.txt",
-                ROOT / "workshop" / "ruang_irama.en-US.workshop",
+                ROOT / "workshop" / "cozywatch-nocturne.en-US.workshop",
                 ROOT / "tests" / "fixtures" / "global_runtime_reference.txt",
             )
         )
